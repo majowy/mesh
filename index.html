@@ -93,11 +93,13 @@ const deltaLon =  0.09;
 let countFake  =  0;
 
 const punktyURL = "./mesh_nodes.json";
-
-
 const runRUN=async()=>{
-	let ret = await asyncFetchJson(punktyURL); 
+	return await asyncFetchJson(punktyURL); 
 }
+document.addEventListener("DOMContentLoaded",async (event)=>{ 
+	let meshtNODE111 = await runRUN();
+	console.log("meshtNODE111=",meshtNODE111);
+})
 
 
 	
