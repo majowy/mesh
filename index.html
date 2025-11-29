@@ -104,16 +104,6 @@ const hexToRgb=(hex) =>{
         else {return("black")}
     }   
   
-
-
-
-const punktyURL = "./mesh_nodes.json";
-const runRUN=async()=>{
-	return await asyncFetchJson(punktyURL); 
-}
-
-
-	
 const fakePosition=()=>{
     countFake++;
     if (countFake>10) {
@@ -126,6 +116,14 @@ const fakePosition=()=>{
 const pallete=["#FF0000","#008800","#0000FF","#FF00FF","#000000","#800000","#00FFFF","#808000","#008000","#800080","#008080","#000080","#808080","#C0C0C0","#FFA500","#FFFF00"];
 const roles = ["CLIENT","CLIENT_MUTE","ROUTER","ROUTER_CLIENT","REPEATER","TRACKER","SENSOR","TAK","CLIENT_HIDDEN","LOST_AND_FOUND","TAK_TRACKER","ROUTER_LATE","CLIENT_BASE"];
 
+
+const punktyURL = "./mesh_nodes.json";
+const runRUN=async()=>{
+	return await asyncFetchJson(punktyURL); 
+}
+
+
+	// dom ready domready async 
 document.addEventListener("DOMContentLoaded",async (event)=>{ 
 	let meshtNODE0 = await runRUN();
 	//console.log("meshtNODE111=",meshtNODE0);
@@ -197,104 +195,102 @@ document.addEventListener("DOMContentLoaded",async (event)=>{
     kategoriaKolor["Inne"]="#000040";
 
     //console.log(kategoriaKolor)
-// 3. Inicjalizacja mapy
-const map = L.map('map').setView([52.0, 19.0], 6);
+	// 3. Inicjalizacja mapy
+	const map = L.map('map').setView([52.0, 19.0], 6);
+	
+	// 4. Dodanie warstwy OpenStreetMap
+	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+	}).addTo(map);
 
-// 4. Dodanie warstwy OpenStreetMap
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-}).addTo(map);
+	
+	// ***********************************************
+	// NOWE KROKI DLA FILTRA: Grupy Warstw
+	// ***********************************************
 
-
-// ***********************************************
-// NOWE KROKI DLA FILTRA: Grupy Warstw
-// ***********************************************
-
-// 5. Inicjalizacja Grup Warstw (Layer Groups) dla każdej kategorii
-const kategorieGrupy = {};
-Object.keys(kategoriaKolor).forEach(kategoria => {
-    // Każda grupa jest domyślnie dodawana do mapy (czyli jest widoczna)
-    //console.log(0,kategoria)
-    //qqqqqqqqqqqqqqqqqqqqqqqqqq
-    kategorieGrupy[kategoria] = L.layerGroup().addTo(map);
-});
-// Upewnienie się, że grupa 'Inne' istnieje
-if (!kategorieGrupy["Inne"]) {kategorieGrupy["Inne"] = L.layerGroup().addTo(map);}
-
-
-// 6. Funkcja do tworzenia markera z widocznym opisem (tabliczka)
-function utworzCustomMarker(dane) {
-    //console.log(dane)
-    const kategoria = dane.kategoria;
-    //console.log("kategoria=",kategoria,dane.role)
-    const kolor = kategoriaKolor[kategoria] || kategoriaKolor["Inne"];
-    
-    // Określenie, do której grupy warstw należy ten marker
-    const grupa = kategorieGrupy[kategoria] || kategorieGrupy["Inne"];
-
-    // Tworzenie elementu DIV dla markera (widoczna 'tabliczka')
-    const iconDiv = document.createElement('div');
-    iconDiv.className = 'custom-marker';
-    iconDiv.style.borderColor = dane.txcolor;
-    iconDiv.style.backgroundColor = dane.bgcolor;
-    iconDiv.style.color = dane.txcolor;
-    iconDiv.textContent = dane.opis;
-
-    // Ustawienie koloru "szpikulca" (dla CSS)
-    const styleSheet = document.createElement("style");
-    styleSheet.innerHTML = `.custom-marker[data-color="${kolor}"]::after { border-top-color: ${kolor}; }`;
-    document.head.appendChild(styleSheet);
-    iconDiv.setAttribute('data-color', kolor);
-
-    // Utworzenie niestandardowej ikony Leaflet
-    const customIcon = L.divIcon({
-        html: iconDiv,
-        className: 'custom-icon',
-        iconSize: [0, 0],
-        iconAnchor: [0, 0]
-    });
-    
-    // Utworzenie markera i dodanie go do ODPOWIEDNIEJ GRUPY
-    const marker = L.marker([dane.lat, dane.lon], { 
-        icon: customIcon,
-        iconAnchor: [0, 0],
-        draggable: true 
-    }).addTo(grupa); // <--- Zmiana: dodajemy do grupy, nie bezpośrednio do mapy
- 
-    
-
-    // Dodanie okna pop-up po kliknięciu
-    const popupContent = `
-        <div style="font-family: sans-serif;">
-            <h4 style="margin: 0 0 5px; color: ${kolor};">${dane.opis} <n>[${dane.km}km]</n></h4>
-            <p style="margin: 0; font-size: 14px;">${dane.szczegolowy_opis}</p>
-            <em>Role: <b>${dane.kategoria}</b>, hop:${dane.hop}<br />${dane.id}</em>
-        </div>
-    `;
-
-    marker.bindPopup(popupContent, {
-        offset: L.point(0, -30)
-    });
-
-    // ***********************************************
-    // NOWY KROK: Obsługa zdarzenia po zakończeniu przesuwania
-    // ***********************************************
-    marker.on('moveend', function(e) {
-        const newLatLng = marker.getLatLng();
-        //console.log(`Punkt "${dane.opis}" przesunięto do: Lat ${newLatLng.lat.toFixed(6)}, Lng ${newLatLng.lng.toFixed(6)}`);
-        
-        // Aktualizacja treści pop-upu z nowymi współrzędnymi (opcjonalnie)
-        marker.setPopupContent(popupContent + 
-            `<hr style="margin: 5px 0;">
-            <p style="margin: 0; font-size: 12px; color: #555;">Nowa pozycja:<br>
-            Lat: ${newLatLng.lat.toFixed(6)}<br>
-            Lng: ${newLatLng.lng.toFixed(6)}</p>
-        `).openPopup();
-    });    
+	// 5. Inicjalizacja Grup Warstw (Layer Groups) dla każdej kategorii
+	const kategorieGrupy = {};
+	Object.keys(kategoriaKolor).forEach(kategoria => {
+	    // Każda grupa jest domyślnie dodawana do mapy (czyli jest widoczna)
+	    //console.log(0,kategoria)
+	    //qqqqqqqqqqqqqqqqqqqqqqqqqq
+	    kategorieGrupy[kategoria] = L.layerGroup().addTo(map);
+	});
+	// Upewnienie się, że grupa 'Inne' istnieje
+	if (!kategorieGrupy["Inne"]) {kategorieGrupy["Inne"] = L.layerGroup().addTo(map);}
 
 
-    return marker;
-}
+	// 6. Funkcja do tworzenia markera z widocznym opisem (tabliczka)
+	function utworzCustomMarker(dane) {
+	    //console.log(dane)
+	    const kategoria = dane.kategoria;
+	    //console.log("kategoria=",kategoria,dane.role)
+	    const kolor = kategoriaKolor[kategoria] || kategoriaKolor["Inne"];
+	    
+	    // Określenie, do której grupy warstw należy ten marker
+	    const grupa = kategorieGrupy[kategoria] || kategorieGrupy["Inne"];
+	
+	    // Tworzenie elementu DIV dla markera (widoczna 'tabliczka')
+	    const iconDiv = document.createElement('div');
+	    iconDiv.className = 'custom-marker';
+	    iconDiv.style.borderColor = dane.txcolor;
+	    iconDiv.style.backgroundColor = dane.bgcolor;
+	    iconDiv.style.color = dane.txcolor;
+	    iconDiv.textContent = dane.opis;
+	
+	    // Ustawienie koloru "szpikulca" (dla CSS)
+	    const styleSheet = document.createElement("style");
+	    styleSheet.innerHTML = `.custom-marker[data-color="${kolor}"]::after { border-top-color: ${kolor}; }`;
+	    document.head.appendChild(styleSheet);
+	    iconDiv.setAttribute('data-color', kolor);
+	
+	    // Utworzenie niestandardowej ikony Leaflet
+	    const customIcon = L.divIcon({
+	        html: iconDiv,
+	        className: 'custom-icon',
+	        iconSize: [0, 0],
+	        iconAnchor: [0, 0]
+	    });
+	    
+	    // Utworzenie markera i dodanie go do ODPOWIEDNIEJ GRUPY
+	    const marker = L.marker([dane.lat, dane.lon], { 
+	        icon: customIcon,
+	        iconAnchor: [0, 0],
+	        draggable: true 
+	    }).addTo(grupa); // <--- Zmiana: dodajemy do grupy, nie bezpośrednio do mapy
+	 
+	    
+	
+	    // Dodanie okna pop-up po kliknięciu
+	    const popupContent = `
+	        <div style="font-family: sans-serif;">
+	            <h4 style="margin: 0 0 5px; color: ${kolor};">${dane.opis} <n>[${dane.km}km]</n></h4>
+	            <p style="margin: 0; font-size: 14px;">${dane.szczegolowy_opis}</p>
+	            <em>Role: <b>${dane.kategoria}</b>, hop:${dane.hop}<br />${dane.id}</em>
+	        </div>
+	    `;
+	
+	    marker.bindPopup(popupContent, {
+	        offset: L.point(0, -30)
+	    });
+	
+	    // ***********************************************
+	    // NOWY KROK: Obsługa zdarzenia po zakończeniu przesuwania
+	    // ***********************************************
+	    marker.on('moveend', function(e) {
+	        const newLatLng = marker.getLatLng();
+	        //console.log(`Punkt "${dane.opis}" przesunięto do: Lat ${newLatLng.lat.toFixed(6)}, Lng ${newLatLng.lng.toFixed(6)}`);
+	        
+	        // Aktualizacja treści pop-upu z nowymi współrzędnymi (opcjonalnie)
+	        marker.setPopupContent(popupContent + 
+	            `<hr style="margin: 5px 0;">
+	            <p style="margin: 0; font-size: 12px; color: #555;">Nowa pozycja:<br>
+	            Lat: ${newLatLng.lat.toFixed(6)}<br>
+	            Lng: ${newLatLng.lng.toFixed(6)}</p>
+	        `).openPopup();
+	    });    
+	    return marker;
+	}
 
 
 const mapaMAPA=(daneJson)=>{
@@ -443,44 +439,42 @@ function policzWidocznePunkty() {
     const szczegoly = licznik > 0 ? `Widoczne punkty: ${widocznePunkty.join(', ')}` : '';
     $("#licznik").textContent = licznik
     //alert(`${wynik}\n${szczegoly}`);
-    
-    console.log(wynik);
-    console.log(szczegoly);
-}
+	    
+	    //console.log(wynik);
+	    //console.log(szczegoly);
+	}
+	
+	// ***********************************************
+	// NOWY KONTROLER: Przycisk Liczący
+	// ***********************************************
+	const CountControl = L.Control.extend({
+	    options: {
+	        position: 'topright' // Umieść obok filtra
+	    },
+	
+	    onAdd: function (map) {
+	        const button = L.DomUtil.create('button', 'leaflet-bar count-button');
+	        button.innerHTML = 'Policz Widoczne Punkty';
+	        button.style.cursor = 'pointer';
+	        button.style.padding = '5px 10px';
+	        button.style.backgroundColor = '#f4f4f4';
+	        button.style.border = '1px solid #ccc';
+	        button.style.borderRadius = '3px';
+	        button.style.marginTop = '10px'; // Odstęp od filtra
+	
+	        // Powiązanie zdarzenia kliknięcia z funkcją liczącą
+	        L.DomEvent.on(button, 'click', L.DomEvent.stopPropagation)
+	                  .on(button, 'click', L.DomEvent.preventDefault)
+	                  .on(button, 'click', policzWidocznePunkty);
+	        
+	        return button;
+	    }
+	});
+	
+	// Dodanie kontrolera przycisku do mapy
+	new CountControl().addTo(map);
 
-// ***********************************************
-// NOWY KONTROLER: Przycisk Liczący
-// ***********************************************
-const CountControl = L.Control.extend({
-    options: {
-        position: 'topright' // Umieść obok filtra
-    },
 
-    onAdd: function (map) {
-        const button = L.DomUtil.create('button', 'leaflet-bar count-button');
-        button.innerHTML = 'Policz Widoczne Punkty';
-        button.style.cursor = 'pointer';
-        button.style.padding = '5px 10px';
-        button.style.backgroundColor = '#f4f4f4';
-        button.style.border = '1px solid #ccc';
-        button.style.borderRadius = '3px';
-        button.style.marginTop = '10px'; // Odstęp od filtra
-
-        // Powiązanie zdarzenia kliknięcia z funkcją liczącą
-        L.DomEvent.on(button, 'click', L.DomEvent.stopPropagation)
-                  .on(button, 'click', L.DomEvent.preventDefault)
-                  .on(button, 'click', policzWidocznePunkty);
-        
-        return button;
-    }
-});
-
-// Dodanie kontrolera przycisku do mapy
-new CountControl().addTo(map);
-
-document.addEventListener("DOMContentLoaded",(event)=>{ 
-    //policzWidocznePunkty()
-});
 });
 // domready async
 
