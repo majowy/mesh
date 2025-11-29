@@ -95,6 +95,10 @@ let countFake  =  0;
 const punktyURL = "./mesh_nodes.json";
 
 
+const runRUN=async()=>{
+	let ret = await asyncFetchJson(punktyURL); 
+}
+
 
 	
 const fakePosition=()=>{
@@ -114,7 +118,8 @@ const pallete=["#FF0000","#008800","#0000FF","#FF00FF","#000000","#800000","#00F
 const roles = ["CLIENT","CLIENT_MUTE","ROUTER","ROUTER_CLIENT","REPEATER","TRACKER","SENSOR","TAK","CLIENT_HIDDEN","LOST_AND_FOUND","TAK_TRACKER","ROUTER_LATE","CLIENT_BASE"];
 //const rolee = ["CLIENT","CLIENT_MUTE","ROUTER","ROUTER_LATE","CLIENT_BASE"];
 console.log(roles)
-            let str_meshtNODE = localStorage.getItem("meshtNODE");
+            //let str_meshtNODE = localStorage.getItem("meshtNODE");
+			let str_meshtNODE = runRUN();	
             let meshtNODE0 = JSON.parse(str_meshtNODE);
             console.log(0,Object.keys(meshtNODE0).length);
             let meshtNODE = {}
