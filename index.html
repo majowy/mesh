@@ -114,17 +114,21 @@ const fakePosition=()=>{
 }    
 const showOrNot=(flag=true)=>{
     let aless = document.querySelectorAll('input[type=checkbox]');
+
     [...aless].forEach((input,i)=>{
         input.checked = flag;        
         const kategoria = input.getAttribute('data-kategoria');
+        //console.log(i,kategoria);
         const grupa = kategorieGrupy[kategoria];
+        //console.log(i,grupa);
         if (flag) map.addLayer(grupa);
         else      map.removeLayer(grupa);
     });
 }
 const pallete=["#FF0000","#008800","#0000FF","#FF00FF","#000000","#800000","#00FFFF","#808000","#008000","#800080","#008080","#000080","#808080","#C0C0C0","#FFA500","#FFFF00"];
 const roles = ["CLIENT","CLIENT_MUTE","ROUTER","ROUTER_CLIENT","REPEATER","TRACKER","SENSOR","TAK","CLIENT_HIDDEN","LOST_AND_FOUND","TAK_TRACKER","ROUTER_LATE","CLIENT_BASE"];
-
+let kategorieGrupy = {};
+let map = null;
 
 const punktyURL = "./zapis/mesh_nodes.json";
 const runRUN=async()=>{
@@ -132,9 +136,9 @@ const runRUN=async()=>{
 }
 
 
-// dom ready domready async ********************************************************************************
-// dom ready domready async ********************************************************************************
-// dom ready domready async ********************************************************************************
+// dom ready domready async *****************************************************************
+// dom ready domready async *****************************************************************
+// dom ready domready async *****************************************************************
 document.addEventListener("DOMContentLoaded",async (event)=>{ 
 	let meshtNODE0 = await runRUN();
 	//console.log("meshtNODE111=",meshtNODE0);
@@ -207,7 +211,7 @@ document.addEventListener("DOMContentLoaded",async (event)=>{
 
     //console.log(kategoriaKolor)
 	// 3. Inicjalizacja mapy
-	const map = L.map('map').setView([52.0, 19.0], 6);
+	map = L.map('map').setView([52.0, 19.0], 6);
 	
 	// 4. Dodanie warstwy OpenStreetMap
 	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -220,7 +224,7 @@ document.addEventListener("DOMContentLoaded",async (event)=>{
 	// ***********************************************
 
 	// 5. Inicjalizacja Grup Warstw (Layer Groups) dla każdej kategorii
-	const kategorieGrupy = {};
+	
 	Object.keys(kategoriaKolor).forEach(kategoria => {
 	    // Każda grupa jest domyślnie dodawana do mapy (czyli jest widoczna)
 	    //console.log(0,kategoria)
@@ -400,7 +404,7 @@ const FilterControl = L.Control.extend({
 function policzWidocznePunkty() {
     // 1. Pobranie aktualnych granic widocznego obszaru mapy
     const bounds = map.getBounds();
-    console.log(bounds)
+    //console.log(bounds)
     let licznik = 0;
     const widocznePunkty = [];
     
