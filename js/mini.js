@@ -75,6 +75,7 @@ const timePL=(time="") => (new Date()).toLocaleString('pl-PL');
 const time2PL=(time) => (new Date(time)).toLocaleString('pl-PL');
 
 /* snipet snipet snipet snipet snipet snipet */  
+/*
 console.log(timePL());
   
 console.log(
@@ -84,6 +85,7 @@ console.log(
     timeZone: "Europe/Warsaw",
   }).format(new Date()),
 );
+*/
 
 
 
