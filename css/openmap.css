@@ -1,0 +1,60 @@
+n {font-weight: normal;}
+em {font-size: 12px;}
+button {margin:0.2em;padding:0.2em;min-width: 3em;;}
+#map {
+	height: 600px;
+	width: 100%;
+}
+
+/* 4. Własny styl dla markera z widocznym opisem (tabliczki) */
+.custom-marker {
+	background-color: white; /* Białe tło 'tabliczki' */
+	border-radius: 5px;
+	padding: 5px 10px;
+	font-weight: bold;
+	font-size: 14px;
+	white-space: nowrap; /* Zapobiega łamaniu tekstu */
+	box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+	border: 2px solid; /* Obramowanie, kolor ustawi się w JS */
+	transform: translate(-50%, -100%); /* Przesunięcie, by 'kotwica' była na dole */
+	position: absolute; /* Umożliwia pozycjonowanie */
+	pointer-events: auto; /* Reaguje na kliknięcia */
+	text-align: center;
+}
+
+/* Styl dla 'szpikulca' wskaźnika */
+.custom-marker::after {
+	content: '';
+	position: absolute;
+	bottom: -8px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 0;
+	height: 0;
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+	border-top: 8px solid; /* Kolor ustawi się w JS */
+}
+/* Nowy styl dla panelu kontrolnego (filtra) */
+.filter-control {
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+    font-family: sans-serif;
+}
+
+.filter-control label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: normal;
+    cursor: pointer;
+}
+
+.filter-control h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 16px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+}

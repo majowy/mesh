@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>OpenMap</title>
+<meta charset="utf-8" />
+<meta name="theme-color" content="#369">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="HandheldFriendly" content="true">
+<meta name="mobile-web-app-capable" content="yes"> 
+<link rel="shortcut icon" type="image/webp" size="144x144" href="./onemap.webp"> 
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="./js/geomap.js"></script>
+<script src="./js/mini.js"></script>
+<link rel="stylesheet" href="./css/openmap.css">
+<style>
+
+</style>
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    
+<script>
+
+let   startLat = 53.17;
+const deltaLat =  0.07;
+const startLon = 14.2;
+const deltaLon =  0.09;
+let countFake  =  0;
+
+
+const convert2Dat=(meshtNODE)=>{
+
+
+    let arr = [];
+    let notRole={}
+    for (id in meshtNODE){
+        let nod = meshtNODE[id];
+        //if (!nod.latitude)  {delete meshtNODE[id]; continue;}
+        //if (!nod.longitude) {delete meshtNODE[id]; continue;}
+        
+        //console.log(id,nod);
+        let obj = {}
+        obj.id=id;
+        let bgcolor = "#"+id.slice(-6);
+        let txcolor = checkBrightness(bgcolor);
+        let txcstyl = styleBrightness(bgcolor);
+        obj.bgcolor = bgcolor;
+        obj.txcolor = txcolor;
+        obj.lat = parseInt(nod.latitude   || 0)/10000000;
+        obj.lon = parseInt(nod.longitude  || 0)/10000000;
+                            let geo=[];
+                            geo[0] = obj.lat;
+                            geo[1] = obj.lon;
+                            
+                            let km = ok(geoKM(geo));
+                            obj.km = km;
+        obj.opis = nod.shortname;
+        obj.kategoria = roles[nod.role] || "Inne";
+                if (!roles[nod.role]) {
+                    //console.log("---",id,nod.shortname,"role=",roles[nod.role],nod)
+                    notRole[id] = nod.shortname
+                }
+        obj.role =nod.role;
+        obj.hop  = nod.hop+"/"+nod.hops;
+        obj.szczegolowy_opis = nod.longname;
+        obj.info = `<span>Hop:${nod.hop}, Role:${roles[nod.role]}</span>`;
+        //if (nod.shortname==="Mila") continue;
+        //if (nod.shortname==="BG_M") continue;
+        //console.log(bgcolor,txcolor)
+        arr.push(obj)
+    }
+    //console.log("notRole=",notRole)
+    return arr;
+}
+
+
+const hexToRgb=(hex) =>{
+        let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
+    }    
+    const checkBrightness=(hex)=>{
+        if (hex==="#?") return "#006"
+        let color = hexToRgb(hex);
+        if (!color) return "#000"
+        const brightness = Math.round(((parseInt(color.r) * 299) +   (parseInt(color.g) * 587) + (parseInt(color.b) * 114)) / 1000)
+        if(brightness < 150){return("rgb(255,255,255)")} 
+        else {return("rgb(0,0,0)")}
+    }   
+    const styleBrightness=(hex)=>{
+        if (hex==="#?") return "#006"
+        let color = hexToRgb(hex);
+        if (!color) return "#000"
+        const brightness = Math.round(((parseInt(color.r) * 299) +   (parseInt(color.g) * 587) + (parseInt(color.b) * 114)) / 1000)
+        if(brightness < 150){return("white")} 
+        else {return("black")}
+    }   
+  
+
+
+
+const punktyURL = "./mesh_nodes.json";
+const runRUN=async()=>{
+	return await asyncFetchJson(punktyURL); 
+}
+
+
+	
+const fakePosition=()=>{
+    countFake++;
+    if (countFake>10) {
+        countFake = 1;
+        startLat-=deltaLat;
+    }
+	return [startLat,startLon+okk(deltaLon*countFake)];
+}    
+
+const pallete=["#FF0000","#008800","#0000FF","#FF00FF","#000000","#800000","#00FFFF","#808000","#008000","#800080","#008080","#000080","#808080","#C0C0C0","#FFA500","#FFFF00"];
+const roles = ["CLIENT","CLIENT_MUTE","ROUTER","ROUTER_CLIENT","REPEATER","TRACKER","SENSOR","TAK","CLIENT_HIDDEN","LOST_AND_FOUND","TAK_TRACKER","ROUTER_LATE","CLIENT_BASE"];
+
+document.addEventListener("DOMContentLoaded",async (event)=>{ 
+	let meshtNODE0 = await runRUN();
+	//console.log("meshtNODE111=",meshtNODE0);
+
+
+            //let meshtNODE0 = JSON.parse(str_meshtNODE);
+            //console.log(0,Object.keys(meshtNODE0).length);
+            let meshtNODE = {}
+                    for (id in meshtNODE0){
+                        let nod = meshtNODE0[id];
+                        //console.log(0,id,nod.shortname, nod.latitude,nod.latitude,nod.role)
+                                //if (nod.latitude  === undefined) {delete meshtNODE0[id];  continue;}
+                                //if (nod.longitude === undefined) {delete meshtNODE0[id];  continue;}
+                                if (nod.latitude===undefined || nod.longitude===undefined || nod.latitude===0 || nod.longitude===0) {
+                                    //delete meshtNODE0[id];  continue;
+                                    let geo = fakePosition();
+                                    nod.latitude  = geo[0]*10000000;
+                                    nod.longitude = geo[1]*10000000;
+                                    //console.log("fakePosition=",geo)
+                                    //console.log("nod====",nod)
+                                }
+                                
+
+                        // {delete meshtNODE0[id];  continue;}
+                        //if (nod.shortname === "xxx") {delete meshtNODE0[id];  continue;}
+                        meshtNODE[id] = nod;
+                    }
+                    //console.log(1,Object.keys(meshtNODE).length);
+                    for (id in meshtNODE){
+                        let nod = meshtNODE[id];
+                        //console.log(1,id,nod.shortname, nod.latitude,nod.latitude,nod.role)
+                    }
+            let kategorie=[];
+            let objKat = {};
+            let arrKat=[];
+            for (let id in meshtNODE){
+                let role = meshtNODE[id].role;
+                //if (role===2) console.log("2 ROUTER=",id,meshtNODE[id].shortname)
+                //if (role===5) console.log("5 tracker=",id,meshtNODE[id].shortname)
+                //if (role===11) console.log("11 ROUTER_LATE=",id,meshtNODE[id].shortname,role)
+                if (role!="undefine" && role!=null) {
+                    //kategorie.push(role)
+                    if (!objKat[role]) objKat[role]=0;
+                    objKat[role]++;
+                }
+            }
+            //console.log(objKat);
+            //arrKat = Object.keys(objKat);
+
+            for(let v in objKat){
+                
+                let c = objKat[v]
+                arrKat.push(c)
+                let name = roles[parseInt(v)];
+                kategorie.push(name);//+"-"+c)
+            }
+            //console.log(JSON.stringify( kategorie))
+            //kategorie = [...new Set(kategorie)].sort((a,b)=>a-b);
+            //kategorie.forEach((v,i)=>{kategorie[i]=roles[parseInt(v)]})
+            //console.log(kategorie)
+
+
+
+    const kategoriaKolor = {};
+    kategorie.forEach((key,c)=>{
+        let val = pallete[c];
+        kategoriaKolor[key]=val;
+    });
+    kategoriaKolor["Inne"]="#000040";
+
+    //console.log(kategoriaKolor)
+// 3. Inicjalizacja mapy
+const map = L.map('map').setView([52.0, 19.0], 6);
+
+// 4. Dodanie warstwy OpenStreetMap
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
+
+
+// ***********************************************
+// NOWE KROKI DLA FILTRA: Grupy Warstw
+// ***********************************************
+
+// 5. Inicjalizacja Grup Warstw (Layer Groups) dla każdej kategorii
+const kategorieGrupy = {};
+Object.keys(kategoriaKolor).forEach(kategoria => {
+    // Każda grupa jest domyślnie dodawana do mapy (czyli jest widoczna)
+    //console.log(0,kategoria)
+    //qqqqqqqqqqqqqqqqqqqqqqqqqq
+    kategorieGrupy[kategoria] = L.layerGroup().addTo(map);
+});
+// Upewnienie się, że grupa 'Inne' istnieje
+if (!kategorieGrupy["Inne"]) {kategorieGrupy["Inne"] = L.layerGroup().addTo(map);}
+
+
+// 6. Funkcja do tworzenia markera z widocznym opisem (tabliczka)
+function utworzCustomMarker(dane) {
+    //console.log(dane)
+    const kategoria = dane.kategoria;
+    //console.log("kategoria=",kategoria,dane.role)
+    const kolor = kategoriaKolor[kategoria] || kategoriaKolor["Inne"];
+    
+    // Określenie, do której grupy warstw należy ten marker
+    const grupa = kategorieGrupy[kategoria] || kategorieGrupy["Inne"];
+
+    // Tworzenie elementu DIV dla markera (widoczna 'tabliczka')
+    const iconDiv = document.createElement('div');
+    iconDiv.className = 'custom-marker';
+    iconDiv.style.borderColor = dane.txcolor;
+    iconDiv.style.backgroundColor = dane.bgcolor;
+    iconDiv.style.color = dane.txcolor;
+    iconDiv.textContent = dane.opis;
+
+    // Ustawienie koloru "szpikulca" (dla CSS)
+    const styleSheet = document.createElement("style");
+    styleSheet.innerHTML = `.custom-marker[data-color="${kolor}"]::after { border-top-color: ${kolor}; }`;
+    document.head.appendChild(styleSheet);
+    iconDiv.setAttribute('data-color', kolor);
+
+    // Utworzenie niestandardowej ikony Leaflet
+    const customIcon = L.divIcon({
+        html: iconDiv,
+        className: 'custom-icon',
+        iconSize: [0, 0],
+        iconAnchor: [0, 0]
+    });
+    
+    // Utworzenie markera i dodanie go do ODPOWIEDNIEJ GRUPY
+    const marker = L.marker([dane.lat, dane.lon], { 
+        icon: customIcon,
+        iconAnchor: [0, 0],
+        draggable: true 
+    }).addTo(grupa); // <--- Zmiana: dodajemy do grupy, nie bezpośrednio do mapy
+ 
+    
+
+    // Dodanie okna pop-up po kliknięciu
+    const popupContent = `
+        <div style="font-family: sans-serif;">
+            <h4 style="margin: 0 0 5px; color: ${kolor};">${dane.opis} <n>[${dane.km}km]</n></h4>
+            <p style="margin: 0; font-size: 14px;">${dane.szczegolowy_opis}</p>
+            <em>Role: <b>${dane.kategoria}</b>, hop:${dane.hop}<br />${dane.id}</em>
+        </div>
+    `;
+
+    marker.bindPopup(popupContent, {
+        offset: L.point(0, -30)
+    });
+
+    // ***********************************************
+    // NOWY KROK: Obsługa zdarzenia po zakończeniu przesuwania
+    // ***********************************************
+    marker.on('moveend', function(e) {
+        const newLatLng = marker.getLatLng();
+        //console.log(`Punkt "${dane.opis}" przesunięto do: Lat ${newLatLng.lat.toFixed(6)}, Lng ${newLatLng.lng.toFixed(6)}`);
+        
+        // Aktualizacja treści pop-upu z nowymi współrzędnymi (opcjonalnie)
+        marker.setPopupContent(popupContent + 
+            `<hr style="margin: 5px 0;">
+            <p style="margin: 0; font-size: 12px; color: #555;">Nowa pozycja:<br>
+            Lat: ${newLatLng.lat.toFixed(6)}<br>
+            Lng: ${newLatLng.lng.toFixed(6)}</p>
+        `).openPopup();
+    });    
+
+
+    return marker;
+}
+
+
+const mapaMAPA=(daneJson)=>{
+    // 6. Przetwarzanie danych JSON i dodawanie markerów
+    daneJson.forEach(dane => {
+        utworzCustomMarker(dane);
+    });
+
+    // Opcjonalnie: Dopasowanie widoku mapy do wszystkich markerów
+    if (daneJson.length > 0) {
+        const bounds = L.latLngBounds(daneJson.map(p => [p.lat, p.lon]));
+        map.fitBounds(bounds, { padding: [50, 50] });
+    } 
+}
+
+// 8. Utworzenie niestandardowego kontrolera dla filtra
+const FilterControl = L.Control.extend({
+    options: {
+        position: 'topright' // Umieść kontroler w prawym górnym rogu
+    },
+
+    onAdd: function (map) {
+        // Utworzenie głównego kontenera DIV
+        const container = L.DomUtil.create('div', 'filter-control leaflet-bar');
+        
+        // Zbudowanie HTML dla listy checkboxów
+        let htmlContent = `<h4>Node: <span id="licznik">${Object.keys(meshtNODE).length}</span></h4>`;
+        
+        Object.keys(kategorieGrupy).forEach((kategoria,i) => {
+            const id = 'filter-' + kategoria.toLowerCase();
+            const kolor = kategoriaKolor[kategoria] || kategoriaKolor["Inne"];
+
+            htmlContent += `
+                <label for="${id}" style="color: ${kolor};" title="${kategoria}-${arrKat[i]}" data-cnt="${arrKat[i]}">
+                    <input type="checkbox" id="${id}" checked data-kategoria="${kategoria}" data-cnt="${arrKat[i]}">
+                    ${kategoria}
+                </label>
+            `;
+        });
+
+        htmlContent += "<button onclick='showOrNot(false)'>Nic</button>";
+        htmlContent += "<button onclick='showOrNot(true)'>Wszystko</button>";
+        
+        container.innerHTML = htmlContent;
+
+        // Zapobieganie zdarzeniom mapy (przesunięcie, powiększenie) na kontrolerze
+        L.DomEvent.disableClickPropagation(container);
+        L.DomEvent.disableScrollPropagation(container);
+
+        // 9. Dodanie logiki obsługi zdarzeń
+        container.addEventListener('change', (e) => {
+            if (e.target.type === 'checkbox') {
+                const kategoria = e.target.getAttribute('data-kategoria');
+                const grupa = kategorieGrupy[kategoria];
+                //console.log(e.target.checked,grupa)
+                if (e.target.checked) {
+                    // Włącz checkbox: dodaj grupę do mapy
+                    map.addLayer(grupa);
+                } else {
+                    // Wyłącz checkbox: usuń grupę z mapy
+                    map.removeLayer(grupa);
+                }
+            }
+            policzWidocznePunkty();
+        });
+
+        return container;
+    }
+});
+
+// 10. Dodanie kontrolera filtra do mapy
+      new FilterControl().addTo(map);
+
+            let nodeJson = convert2Dat(meshtNODE);
+            //console.log(nodeJson);
+            
+            //console.log(daneJson)
+            mapaMAPA(nodeJson);
+            /*let aless = document.querySelectorAll("div.filter-control label");
+            console.log(aless);
+            [...aless].forEach((c)=>{
+            })*/
+
+
+
+const showOrNot=(flag=true)=>{
+    let aless = document.querySelectorAll('input[type=checkbox]');
+
+    [...aless].forEach((input,i)=>{
+        input.checked = flag;        
+        const kategoria = input.getAttribute('data-kategoria');
+        //console.log(i,kategoria);
+        const grupa = kategorieGrupy[kategoria];
+        //console.log(i,grupa);
+        if (flag) map.addLayer(grupa);
+        else      map.removeLayer(grupa);
+    });
+}
+
+
+
+
+
+// ***********************************************
+// NOWA FUNKCJA: Liczenie widocznych punktów
+// ***********************************************
+
+function policzWidocznePunkty() {
+    // 1. Pobranie aktualnych granic widocznego obszaru mapy
+    const bounds = map.getBounds();
+    console.log(bounds)
+    let licznik = 0;
+    const widocznePunkty = [];
+    
+    // Lista wszystkich grup, które są AKTYWNE na mapie
+    const aktywneGrupy = Object.values(kategorieGrupy).filter(grupa => map.hasLayer(grupa));
+    //console.log(aktywneGrupy.length)
+    // 2. Iteracja przez aktywne grupy markerów
+    aktywneGrupy.forEach((grupa,i) => {
+        // Iteracja przez markery wewnątrz danej grupy
+        //console.log(i,grupa)
+        grupa.eachLayer(marker => {
+            //console.log(marker)
+            // 3. Pobranie współrzędnych markera
+            const latlng = marker.getLatLng();
+
+            // 4. Sprawdzenie, czy marker znajduje się w granicach
+            if (bounds.contains(latlng)) {
+                licznik++;
+                // Zakładamy, że oryginalne dane (opis) są przechowywane w opcjach markera
+                // W Leaflet nie ma to automatycznie, musimy to dodać.
+                // Ponieważ dane oryginalne są w zmiennej 'daneJson', użyjemy uproszczonej logiki
+                // zakładającej, że marker ma atrybut 'opis'
+                //console.log(marker.options.icon.options.html)
+                //const opis = marker.options.icon.options.html.match(/<div.*?>(.*?)<\/div>/)[1];
+                const opis = marker.options.icon.options.html.textContent //match(/<div.*?>(.*?)<\/div>/)//[1];
+                //?????????????????????????????????????????????????????/
+                //console.log("000000000000000000=",opis)
+                widocznePunkty.push(opis);
+            }
+        });
+    });
+
+    // Wyświetlenie wyniku
+    const wynik = `Na mapie widoczne są ${licznik} punkty.`;
+    const szczegoly = licznik > 0 ? `Widoczne punkty: ${widocznePunkty.join(', ')}` : '';
+    $("#licznik").textContent = licznik
+    //alert(`${wynik}\n${szczegoly}`);
+    
+    console.log(wynik);
+    console.log(szczegoly);
+}
+
+// ***********************************************
+// NOWY KONTROLER: Przycisk Liczący
+// ***********************************************
+const CountControl = L.Control.extend({
+    options: {
+        position: 'topright' // Umieść obok filtra
+    },
+
+    onAdd: function (map) {
+        const button = L.DomUtil.create('button', 'leaflet-bar count-button');
+        button.innerHTML = 'Policz Widoczne Punkty';
+        button.style.cursor = 'pointer';
+        button.style.padding = '5px 10px';
+        button.style.backgroundColor = '#f4f4f4';
+        button.style.border = '1px solid #ccc';
+        button.style.borderRadius = '3px';
+        button.style.marginTop = '10px'; // Odstęp od filtra
+
+        // Powiązanie zdarzenia kliknięcia z funkcją liczącą
+        L.DomEvent.on(button, 'click', L.DomEvent.stopPropagation)
+                  .on(button, 'click', L.DomEvent.preventDefault)
+                  .on(button, 'click', policzWidocznePunkty);
+        
+        return button;
+    }
+});
+
+// Dodanie kontrolera przycisku do mapy
+new CountControl().addTo(map);
+
+document.addEventListener("DOMContentLoaded",(event)=>{ 
+    //policzWidocznePunkty()
+});
+});
+// domready async
+
+
+</script>
+</body>
+</html>
