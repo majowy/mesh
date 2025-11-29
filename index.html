@@ -11,50 +11,47 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="../js/geomap.js"></script>
+<script src="./geomap.js"></script>
+<script src="./mini.js"></script>
 
+<style>
+n {font-weight: normal;}
+em {font-size: 12px;}
+button {margin:0.2em;padding:0.2em;min-width: 3em;;}
+#map {
+	height: 600px;
+	width: 100%;
+}
 
+/* 4. Własny styl dla markera z widocznym opisem (tabliczki) */
+.custom-marker {
+	background-color: white; /* Białe tło 'tabliczki' */
+	border-radius: 5px;
+	padding: 5px 10px;
+	font-weight: bold;
+	font-size: 14px;
+	white-space: nowrap; /* Zapobiega łamaniu tekstu */
+	box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+	border: 2px solid; /* Obramowanie, kolor ustawi się w JS */
+	transform: translate(-50%, -100%); /* Przesunięcie, by 'kotwica' była na dole */
+	position: absolute; /* Umożliwia pozycjonowanie */
+	pointer-events: auto; /* Reaguje na kliknięcia */
+	text-align: center;
+}
 
-
-
-    <style>
-        n {font-weight: normal;}
-        em {font-size: 12px;}
-        button {margin:0.2em;padding:0.2em;min-width: 3em;;}
-        #map {
-            height: 600px;
-            width: 100%;
-        }
-
-        /* 4. Własny styl dla markera z widocznym opisem (tabliczki) */
-        .custom-marker {
-            background-color: white; /* Białe tło 'tabliczki' */
-            border-radius: 5px;
-            padding: 5px 10px;
-            font-weight: bold;
-            font-size: 14px;
-            white-space: nowrap; /* Zapobiega łamaniu tekstu */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            border: 2px solid; /* Obramowanie, kolor ustawi się w JS */
-            transform: translate(-50%, -100%); /* Przesunięcie, by 'kotwica' była na dole */
-            position: absolute; /* Umożliwia pozycjonowanie */
-            pointer-events: auto; /* Reaguje na kliknięcia */
-            text-align: center;
-        }
-
-        /* Styl dla 'szpikulca' wskaźnika */
-        .custom-marker::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-top: 8px solid; /* Kolor ustawi się w JS */
-        }
+/* Styl dla 'szpikulca' wskaźnika */
+.custom-marker::after {
+	content: '';
+	position: absolute;
+	bottom: -8px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 0;
+	height: 0;
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+	border-top: 8px solid; /* Kolor ustawi się w JS */
+}
 /* Nowy styl dla panelu kontrolnego (filtra) */
 .filter-control {
     background: white;
@@ -79,15 +76,14 @@
     padding-bottom: 5px;
 }
 
-
-    </style>
+</style>
 </head>
 <body>
 
     <div id="map"></div>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="../js/mini.js"></script>
+    
 <script>
 let markers = [];
 let   startLat = 53.17;
@@ -96,6 +92,11 @@ const startLon = 14.2;
 const deltaLon =  0.09;
 let countFake  =  0;
 
+const punktyURL = "./mesh_nodes.json";
+
+
+
+	
 const fakePosition=()=>{
     countFake++;
     if (countFake>10) {
