@@ -112,7 +112,16 @@ const fakePosition=()=>{
     }
 	return [startLat,startLon+okk(deltaLon*countFake)];
 }    
-
+const showOrNot=(flag=true)=>{
+    let aless = document.querySelectorAll('input[type=checkbox]');
+    [...aless].forEach((input,i)=>{
+        input.checked = flag;        
+        const kategoria = input.getAttribute('data-kategoria');
+        const grupa = kategorieGrupy[kategoria];
+        if (flag) map.addLayer(grupa);
+        else      map.removeLayer(grupa);
+    });
+}
 const pallete=["#FF0000","#008800","#0000FF","#FF00FF","#000000","#800000","#00FFFF","#808000","#008000","#800080","#008080","#000080","#808080","#C0C0C0","#FFA500","#FFFF00"];
 const roles = ["CLIENT","CLIENT_MUTE","ROUTER","ROUTER_CLIENT","REPEATER","TRACKER","SENSOR","TAK","CLIENT_HIDDEN","LOST_AND_FOUND","TAK_TRACKER","ROUTER_LATE","CLIENT_BASE"];
 
@@ -123,7 +132,9 @@ const runRUN=async()=>{
 }
 
 
-	// dom ready domready async 
+// dom ready domready async ********************************************************************************
+// dom ready domready async ********************************************************************************
+// dom ready domready async ********************************************************************************
 document.addEventListener("DOMContentLoaded",async (event)=>{ 
 	let meshtNODE0 = await runRUN();
 	//console.log("meshtNODE111=",meshtNODE0);
@@ -376,19 +387,7 @@ const FilterControl = L.Control.extend({
 
 
 
-const showOrNot=(flag=true)=>{
-    let aless = document.querySelectorAll('input[type=checkbox]');
 
-    [...aless].forEach((input,i)=>{
-        input.checked = flag;        
-        const kategoria = input.getAttribute('data-kategoria');
-        //console.log(i,kategoria);
-        const grupa = kategorieGrupy[kategoria];
-        //console.log(i,grupa);
-        if (flag) map.addLayer(grupa);
-        else      map.removeLayer(grupa);
-    });
-}
 
 
 
