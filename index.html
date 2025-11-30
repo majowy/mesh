@@ -37,6 +37,7 @@ const deltaLat =  0.07;
 const startLon = 14.2;
 const deltaLon =  0.09;
 let countFake  =  0;
+let nodeCount=0
 
 
 const convert2Dat=(meshtNODE)=>{
@@ -81,6 +82,7 @@ const convert2Dat=(meshtNODE)=>{
         arr.push(obj)
     }
     //console.log("notRole=",notRole)
+    nodeCount = Object.keys(meshtNODE).length;
     return arr;
 }
 
@@ -126,11 +128,16 @@ const showOrNot=(flag=true)=>{
         const kategoria = input.getAttribute('data-kategoria');
         //console.log(i,kategoria);
         const grupa = kategorieGrupy[kategoria];
-        //console.log(i,grupa);
-        if (flag) map.addLayer(grupa);
-        else      map.removeLayer(grupa);
+        
+        if (grupa){
+            //console.log(i,grupa);
+            if (flag) {map.addLayer(grupa);$("#licznik").textContent     = nodeCount;}
+            else      {map.removeLayer(grupa); $("#licznik").textContent = 0;}
+        }
     });
+    //policzWidocznePunkty();
 }
+
 const pallete=["#FF0000","#008800","#0000FF","#FF00FF","#000000","#800000","#00FFFF","#808000","#008000","#800080","#008080","#000080","#808080","#C0C0C0","#FFA500","#FFFF00"];
 const roles = ["CLIENT","CLIENT_MUTE","ROUTER","ROUTER_CLIENT","REPEATER","TRACKER","SENSOR","TAK","CLIENT_HIDDEN","LOST_AND_FOUND","TAK_TRACKER","ROUTER_LATE","CLIENT_BASE"];
 let kategorieGrupy = {};
@@ -149,7 +156,7 @@ document.addEventListener("DOMContentLoaded",async (event)=>{
     const wszystkieMarkery = [];
 	let meshtNODE0 = await runRUN();
 	//console.log("meshtNODE111=",meshtNODE0);
-
+    //const showOrNot_=()=>{showOrNot()}
 
             //let meshtNODE0 = JSON.parse(str_meshtNODE);
             //console.log(0,Object.keys(meshtNODE0).length);
