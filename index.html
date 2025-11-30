@@ -242,7 +242,7 @@ document.addEventListener("DOMContentLoaded",async (event)=>{
 
 
 	// 6. Funkcja do tworzenia markera z widocznym opisem (tabliczka)
-	function utworzCustomMarker(dane) {
+	const utworzCustomMarker=(dane) =>{
 	    //console.log(dane)
 	    const kategoria = dane.kategoria;
 	    //console.log("kategoria=",kategoria,dane.role)
@@ -488,64 +488,111 @@ const policzWidocznePunkty=()=> {
 
 
 
-// ***********************************************
-// NOWY KONTROLER: Blokada Przesuwania
-// ***********************************************
-const DragToggleControl = L.Control.extend({
-    options: {
-        position: 'topright'    //'topleft' // Umieść w lewym górnym rogu
-    },
+        // ***********************************************
+        // NOWY KONTROLER: Blokada Przesuwania
+        // ***********************************************
+        const DragToggleControl = L.Control.extend({
+            options: {
+                position: 'topright'    //'topleft' // Umieść w lewym górnym rogu
+            },
 
-    onAdd: function (map) {
-        // Utworzenie głównego kontenera DIV
-        const container = L.DomUtil.create('div', 'drag-toggle-control leaflet-bar');
-        const checkboxId = 'drag-toggle-checkbox';
+            onAdd: function (map) {
+                // Utworzenie głównego kontenera DIV
+                const container = L.DomUtil.create('div', 'drag-toggle-control leaflet-bar');
+                const checkboxId = 'drag-toggle-checkbox';
 
-        container.innerHTML = `
-            <div style="padding: 5px; background: white; border-radius: 3px;min-width: 9em; color:navy">
-                <input type="checkbox" id="${checkboxId}" checked>
-                <label for="${checkboxId}" style="margin-left: 5px; font-weight: bold;">
-                    Przesuw ON
-                </label>
-            </div>
-        `;
-        
-        // Odczytanie elementów
-        const checkbox = container.querySelector(`#${checkboxId}`);
-        const label = container.querySelector(`label[for="${checkboxId}"]`);
+                container.innerHTML = `
+                    <div style="padding: 5px; background: white; border-radius: 3px;min-width: 9em; color:navy">
+                        <input type="checkbox" id="${checkboxId}" checked>
+                        <label for="${checkboxId}" style="margin-left: 5px; font-weight: bold;">
+                            Przesuw ON
+                        </label>
+                    </div>
+                `;
+                
+                // Odczytanie elementów
+                const checkbox = container.querySelector(`#${checkboxId}`);
+                const label = container.querySelector(`label[for="${checkboxId}"]`);
 
-        // Zapobieganie zdarzeniom mapy
-        L.DomEvent.disableClickPropagation(container);
-        L.DomEvent.disableScrollPropagation(container);
+                // Zapobieganie zdarzeniom mapy
+                L.DomEvent.disableClickPropagation(container);
+                L.DomEvent.disableScrollPropagation(container);
 
-        // Dodanie logiki obsługi zdarzeń
-        L.DomEvent.on(checkbox, 'change', function() {
-            const jestWlaczone = this.checked;
-            
-            // 1. Zmiana etykiety
-            label.textContent = jestWlaczone ? 'Przesuw  ON' : 'Przesuw OFF';
-            
-            // 2. Iteracja po wszystkich markerach i zmiana ich stanu
-            wszystkieMarkery.forEach(marker => {
-                if (jestWlaczone) {
-                    marker.dragging.enable();
-                } else {
-                    marker.dragging.disable();
-                }
-            });
+                // Dodanie logiki obsługi zdarzeń
+                L.DomEvent.on(checkbox, 'change', function() {
+                    const jestWlaczone = this.checked;
+                    
+                    // 1. Zmiana etykiety
+                    label.textContent = jestWlaczone ? 'Przesuw  ON' : 'Przesuw OFF';
+                    
+                    // 2. Iteracja po wszystkich markerach i zmiana ich stanu
+                    wszystkieMarkery.forEach(marker => {
+                        if (jestWlaczone) {
+                            marker.dragging.enable();
+                        } else {
+                            marker.dragging.disable();
+                        }
+                    });
 
-            // 3. Opcjonalnie: Wyświetlenie komunikatu
-            //console.log(`Przesuwanie markerów: ${jestWlaczone ? 'WŁĄCZONE' : 'WYŁĄCZONE'}`);
+                    // 3. Opcjonalnie: Wyświetlenie komunikatu
+                    //console.log(`Przesuwanie markerów: ${jestWlaczone ? 'WŁĄCZONE' : 'WYŁĄCZONE'}`);
+                });
+
+                return container;
+            }
         });
 
-        return container;
-    }
-});
-
-// Dodanie kontrolera do mapy
-new DragToggleControl().addTo(map);
+        // Dodanie kontrolera do mapy
+        new DragToggleControl().addTo(map);
 
 
+
+        /**
+         * Zaznacza na mapie wielokąt (polygon) na podstawie podanych współrzędnych.
+         * @param {Array<Array<number>>} coords Tablica wierzchołków [[lat1, lon1], [lat2, lon2], ...]
+         * @param {L.Map} map Obiekt mapy Leaflet.
+         */
+        function zaznaczObszarPolygon(coords, map) {
+            console.log(coords, map)
+            const stylObszaru = {
+                // Styl linii granicznej
+                color: '#0078FF',     // Kolor linii (niebieski)
+                weight: 3,            // Grubość linii
+                opacity: 0.8,         // Krycie linii (półprzezroczysta)
+                
+                // Styl wypełnienia (przezroczysty)
+                fillColor: '#0078FF', // Kolor wypełnienia (niebieski)
+                fillOpacity: 0.3      // KLUCZ: Przezroczystość wypełnienia (0.0 to całkowita przezroczystość, 1.0 to pełne krycie)
+            };
+
+            // Tworzenie obiektu L.Polygon i dodawanie go do mapy
+            const obszar = L.polygon(coords, stylObszaru).addTo(map);
+
+            // Opcjonalnie: dopasowanie widoku mapy do zaznaczonego obszaru
+            //map.fitBounds(obszar.getBounds());
+            
+            return obszar;
+        }
+
+        // Przykład użycia (zaznaczenie centrum Warszawy)
+        const wierzcholkiWarszawy = [
+            [53.25, 14.00],
+            [53.20, 14.05],
+            [53.22, 14.10],
+            [53.26, 14.08]
+        ];
+        const wierzcholkiINNE = [
+            [53.30, 14.12],
+            [52.94, 14.12],
+            [52.94, 15.38],
+            [53.30, 15.38],
+        ];
+
+        const zaznaczINNE=()=>{
+            zaznaczObszarPolygon(wierzcholkiINNE, map);
+        }
+
+        setTimeout(()=>{zaznaczINNE()},500)
 
 });
 // EOF domready async --------------------------------------------
