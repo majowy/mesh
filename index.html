@@ -539,11 +539,13 @@ const policzWidocznePunkty=()=> {
                     label.textContent = jestWlaczone ? 'Przesuw  ON' : 'Przesuw OFF';
                     
                     // 2. Iteracja po wszystkich markerach i zmiana ich stanu
+                    //console.log(wszystkieMarkery.length)
                     wszystkieMarkery.forEach(marker => {
+                        //console.log(marker.dragging)
                         if (jestWlaczone) {
-                            marker.dragging.enable();
+                            if (marker.dragging) marker.dragging.enable();
                         } else {
-                            marker.dragging.disable();
+                            if (marker.dragging) marker.dragging.disable();
                         }
                     });
 
