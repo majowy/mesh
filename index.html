@@ -140,6 +140,7 @@ const runRUN=async()=>{
 // dom ready domready async *****************************************************************
 // dom ready domready async *****************************************************************
 document.addEventListener("DOMContentLoaded",async (event)=>{ 
+    const wszystkieMarkery = [];
 	let meshtNODE0 = await runRUN();
 	//console.log("meshtNODE111=",meshtNODE0);
 
@@ -161,10 +162,15 @@ document.addEventListener("DOMContentLoaded",async (event)=>{
                                     //console.log("nod====",nod)
                                 }
                                 
-
-                        // {delete meshtNODE0[id];  continue;}
-                        //if (nod.shortname === "xxx") {delete meshtNODE0[id];  continue;}
-                        meshtNODE[id] = nod;
+                            /*if (id==="!b03d116c") {
+                                console.log(!nod.shortname,"uuuuuuuuu=",nod)
+                            }*/
+                        
+                            if (nod.shortname === "xxx" || !nod.shortname) {
+                                nod.shortname = id.substr(id.length - 4);
+                                nod.longname  = id;
+                            }
+                            meshtNODE[id] = nod;
                     }
                     //console.log(1,Object.keys(meshtNODE).length);
                     for (id in meshtNODE){
@@ -271,9 +277,10 @@ document.addEventListener("DOMContentLoaded",async (event)=>{
 	    const marker = L.marker([dane.lat, dane.lon], { 
 	        icon: customIcon,
 	        iconAnchor: [0, 0],
+            originalDescription: dane.opis,
 	        draggable: true 
 	    }).addTo(grupa); // <--- Zmiana: dodajemy do grupy, nie bezpośrednio do mapy
-	 
+        wszystkieMarkery.push(marker);
 	    
 	
 	    // Dodanie okna pop-up po kliknięciu
@@ -401,7 +408,7 @@ const FilterControl = L.Control.extend({
 // NOWA FUNKCJA: Liczenie widocznych punktów
 // ***********************************************
 
-function policzWidocznePunkty() {
+const policzWidocznePunkty=()=> {
     // 1. Pobranie aktualnych granic widocznego obszaru mapy
     const bounds = map.getBounds();
     //console.log(bounds)
@@ -457,7 +464,7 @@ function policzWidocznePunkty() {
 	
 	    onAdd: function (map) {
 	        const button = L.DomUtil.create('button', 'leaflet-bar count-button');
-	        button.innerHTML = 'Policz Widoczne Punkty';
+	        button.innerHTML = 'Policz';
 	        button.style.cursor = 'pointer';
 	        button.style.padding = '5px 10px';
 	        button.style.backgroundColor = '#f4f4f4';
@@ -471,15 +478,79 @@ function policzWidocznePunkty() {
 	                  .on(button, 'click', policzWidocznePunkty);
 	        
 	        return button;
+            
 	    }
 	});
 	
 	// Dodanie kontrolera przycisku do mapy
-	new CountControl().addTo(map);
+	//????????? new CountControl().addTo(map);
+
+
+
+
+// ***********************************************
+// NOWY KONTROLER: Blokada Przesuwania
+// ***********************************************
+const DragToggleControl = L.Control.extend({
+    options: {
+        position: 'topright'    //'topleft' // Umieść w lewym górnym rogu
+    },
+
+    onAdd: function (map) {
+        // Utworzenie głównego kontenera DIV
+        const container = L.DomUtil.create('div', 'drag-toggle-control leaflet-bar');
+        const checkboxId = 'drag-toggle-checkbox';
+
+        container.innerHTML = `
+            <div style="padding: 5px; background: white; border-radius: 3px;min-width: 9em; color:navy">
+                <input type="checkbox" id="${checkboxId}" checked>
+                <label for="${checkboxId}" style="margin-left: 5px; font-weight: bold;">
+                    Przesuw ON
+                </label>
+            </div>
+        `;
+        
+        // Odczytanie elementów
+        const checkbox = container.querySelector(`#${checkboxId}`);
+        const label = container.querySelector(`label[for="${checkboxId}"]`);
+
+        // Zapobieganie zdarzeniom mapy
+        L.DomEvent.disableClickPropagation(container);
+        L.DomEvent.disableScrollPropagation(container);
+
+        // Dodanie logiki obsługi zdarzeń
+        L.DomEvent.on(checkbox, 'change', function() {
+            const jestWlaczone = this.checked;
+            
+            // 1. Zmiana etykiety
+            label.textContent = jestWlaczone ? 'Przesuw  ON' : 'Przesuw OFF';
+            
+            // 2. Iteracja po wszystkich markerach i zmiana ich stanu
+            wszystkieMarkery.forEach(marker => {
+                if (jestWlaczone) {
+                    marker.dragging.enable();
+                } else {
+                    marker.dragging.disable();
+                }
+            });
+
+            // 3. Opcjonalnie: Wyświetlenie komunikatu
+            //console.log(`Przesuwanie markerów: ${jestWlaczone ? 'WŁĄCZONE' : 'WYŁĄCZONE'}`);
+        });
+
+        return container;
+    }
+});
+
+// Dodanie kontrolera do mapy
+new DragToggleControl().addTo(map);
+
 
 
 });
-// domready async
+// EOF domready async --------------------------------------------
+// EOF domready async --------------------------------------------
+// EOF domready async --------------------------------------------
 
 
 </script>
