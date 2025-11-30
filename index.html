@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>OpenMap v9</title>
+<title>OpenMap</title>
 <meta charset="utf-8" />
 <meta name="theme-color" content="#369">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,11 +22,17 @@
     opacity:0.8;  
     white-space: nowrap; 
 }
+table td, table th {
+    border: 1px solid gray;
+    padding: 0.25em;
+}
 </style>
 </head>
 <body>
 
     <div id="map"></div>
+
+    <pre id="info"></pre>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     
@@ -144,8 +150,13 @@ let kategorieGrupy = {};
 let map = null;
 
 const punktyURL = "./zapis/mesh_nodes.json";
+const infoURL   = "./zapis/mesh_info.json";
+
 const runRUN=async()=>{
 	return await asyncFetchJson(punktyURL); 
+}
+const runINFO=async()=>{
+	return await asyncFetchJson(infoURL); 
 }
 
 
@@ -630,10 +641,27 @@ const policzWidocznePunkty=()=> {
 
         setTimeout(()=>{zaznaczINNE()},500)
 
+        //iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
+        //iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
+        //iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
+        let infoINFO = await runINFO();
+        //console.log(infoINFO);
+        //$("#info").innerHTML = JSON.stringify(infoINFO,null,4);
+        let arr = [];
+        for (let key in infoINFO){
+            let val = infoINFO[key];
+            //console.log(key,val);
+            arr.push(`<tr><td>${key}</td><td>${val}</td></tr>`);
+        }
+        let table = arr.join("");
+        $("#info").innerHTML += "<h3>Udział %</h3><table>"+table+"</table>"
+
 });
 // EOF domready async --------------------------------------------
 // EOF domready async --------------------------------------------
 // EOF domready async --------------------------------------------
+
+
 
 
 </script>
