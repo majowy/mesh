@@ -26,6 +26,7 @@ table td, table th {
     border: 1px solid gray;
     padding: 0.25em;
 }
+td:last-child {text-align: right;}
 </style>
 </head>
 <body>
@@ -654,7 +655,7 @@ const policzWidocznePunkty=()=> {
             arr.push(`<tr><td>${key}</td><td>${val}</td></tr>`);
         }
         let table = arr.join("");
-        $("#info").innerHTML += "<h3>Udział %</h3><table>"+table+"</table>"
+        $("#info").innerHTML += "<h4>Udział % pakietów</h4><table>"+table+"</table>"
 
 });
 // EOF domready async --------------------------------------------
