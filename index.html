@@ -15,7 +15,13 @@
 <script src="./js/mini.js"></script>
 <link rel="stylesheet" href="./css/openmap.css">
 <style>
-
+.polygon-label {color:red;}
+/* Styl dla etykiety tekstowej poligonu */
+.polygon-label-top-left {
+    background:#93c4fb; 
+    opacity:0.8;  
+    white-space: nowrap; 
+}
 </style>
 </head>
 <body>
@@ -553,7 +559,6 @@ const policzWidocznePunkty=()=> {
          * @param {L.Map} map Obiekt mapy Leaflet.
          */
         function zaznaczObszarPolygon(coords, map) {
-            console.log(coords, map)
             const stylObszaru = {
                 // Styl linii granicznej
                 color: '#0078FF',     // Kolor linii (niebieski)
@@ -567,6 +572,28 @@ const policzWidocznePunkty=()=> {
 
             // Tworzenie obiektu L.Polygon i dodawanie go do mapy
             const obszar = L.polygon(coords, stylObszaru).addTo(map);
+
+                                    // ***********************************************
+                                        // DODANIE TEKSTU PRZY POMOCY TOOLTIP
+                                        // ***********************************************
+                                        const bounds = obszar.getBounds();
+                                        // Pobranie współrzędnych północno-zachodnich (najwyższa lat, najniższa lng)
+                                        const topLeft = bounds.getNorthWest();
+                                        const kotwica = L.marker(topLeft, { opacity: 0.0, clickable: false }).addTo(map);
+                                        const przesuniecie = L.point(10, 50); // 10px w prawo (X), 5px w dół (Y)
+                                        kotwica.bindTooltip("Nody bez lokalizacji", {
+                                            permanent: true,       // Tekst jest stale widoczny
+                                            direction: 'top',      // Tekst pojawia się nad kotwicą
+                                            offset: przesuniecie,  // Przesuń tekst nieco w prawo i w dół od granicy poligonu
+                                            className: 'polygon-label-top-left' // Własna klasa CSS
+                                        }).openTooltip();
+                                        /*obszar.bindTooltip("Nody bez lokalizacji", {
+                                            permanent: true,       // Tekst jest stale widoczny (nie tylko po najechaniu)
+                                            direction: 'top',   // Tekst jest wyśrodkowany wewnątrz poligonu
+                                            className: 'polygon-label' // Klasa CSS do ewentualnego ostylowania
+                                        }).openTooltip();*/
+                                                                          
+
 
             // Opcjonalnie: dopasowanie widoku mapy do zaznaczonego obszaru
             //map.fitBounds(obszar.getBounds());
