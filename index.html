@@ -15,6 +15,8 @@
 <script src="./js/mini.js"></script>
 <link rel="stylesheet" href="./css/openmap.css">
 <style>
+    body {margin: 0;}
+    pre#info {padding:0.5em;}
 .polygon-label {color:red;}
 /* Styl dla etykiety tekstowej poligonu */
 .polygon-label-top-left {
@@ -305,7 +307,7 @@ document.addEventListener("DOMContentLoaded",async (event)=>{
 	    const marker = L.marker([dane.lat, dane.lon], { 
 	        icon: customIcon,
 	        iconAnchor: [0, 0],
-            originalDescription: dane.opis+" "+dane.long,// + " " + dane.kategoria, // dla wyszukiwania
+            originalDescription: dane.opis+" "+dane.long+" "+dane.id,// + " " + dane.kategoria, // dla wyszukiwania
 	        draggable: true,
             kategoria: dane.kategoria // Zapisz kategorię, aby wiedzieć, do której grupy należy
 	    }).addTo(grupa); // <--- Zmiana: dodajemy do grupy, nie bezpośrednio do mapy
@@ -652,7 +654,7 @@ const policzWidocznePunkty=()=> {
         //iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
         //iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
         let infoINFO = await runINFO();
-        console.log(infoINFO);
+        //console.log(infoINFO);
         let aktualizacja= "<p><b>Aktualizacja:<br />"+infoINFO.aktualizacja+"</b></p>"
         //$("#info").innerHTML = JSON.stringify(infoINFO,null,4);
         let arr = [];
@@ -662,7 +664,7 @@ const policzWidocznePunkty=()=> {
             arr.push(`<tr><td>${key}</td><td>${val}</td></tr>`);
         }
         let table = arr.join("");
-        $("#info").innerHTML += aktualizacja+"<h4>Udział % pakietów</h4><table>"+table+"</table>"
+        $("#info").innerHTML += aktualizacja+"<p>Udział % pakietów</p><table>"+table+"</table>"
 
 
 
@@ -688,9 +690,17 @@ const SearchControl = L.Control.extend({
         container.innerHTML = `
             <input type="text" id="search-input" placeholder="Wyszukaj punkt..." 
                    style="padding: 5px; border: 1px solid #ccc; border-radius: 3px; width: 8em; font-size: 14px;">
+            <button id="clear-search" 
+                    style="position: absolute; right: 0; top: 0; height: 100%; width: 15px; 
+                           border: none; background: none; cursor: pointer; color: #888; 
+                           font-size: 16px; font-weight: bold; padding: 0; margin:0;min-width: 2em;"
+                    title="Wyczyść wyszukiwanie">
+                &times; 
+            </button>
         `;
         
         const input = container.querySelector('#search-input');
+        const clearButton = container.querySelector('#clear-search');
 
         // Zapobieganie zdarzeniom mapy
         L.DomEvent.disableClickPropagation(container);
@@ -699,7 +709,18 @@ const SearchControl = L.Control.extend({
         // Dodanie logiki obsługi zdarzeń: filtrowanie przy każdym naciśnięciu klawisza
         L.DomEvent.on(input, 'keyup', function() {
             filtrMarkery(this.value.toLowerCase());
+            clearButton.style.display = this.value.length > 0 ? 'block' : 'none';
         });
+        // Logika kasowania
+        L.DomEvent.on(clearButton, 'click', function() {
+            input.value = ''; // Wyzerowanie wartości pola
+            filtrMarkery(''); // Wywołanie filtru z pustym ciągiem (pokaż wszystko)
+            this.style.display = 'none'; // Ukrycie przycisku
+            input.focus(); // Ustawienie kursora w polu
+        });
+        
+        // Ukryj przycisk na początku
+        clearButton.style.display = 'none';
 
         return container;
     }
