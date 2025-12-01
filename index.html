@@ -74,6 +74,7 @@ const convert2Dat=(meshtNODE)=>{
                             let km = ok(geoKM(geo));
                             obj.km = km;
         obj.opis = nod.shortname;
+        obj.long = nod.longname;
         obj.kategoria = roles[nod.role] || "Inne";
                 if (!roles[nod.role]) {
                     //console.log("---",id,nod.shortname,"role=",roles[nod.role],nod)
@@ -304,8 +305,9 @@ document.addEventListener("DOMContentLoaded",async (event)=>{
 	    const marker = L.marker([dane.lat, dane.lon], { 
 	        icon: customIcon,
 	        iconAnchor: [0, 0],
-            originalDescription: dane.opis,
-	        draggable: true 
+            originalDescription: dane.opis+" "+dane.long,// + " " + dane.kategoria, // dla wyszukiwania
+	        draggable: true,
+            kategoria: dane.kategoria // Zapisz kategorię, aby wiedzieć, do której grupy należy
 	    }).addTo(grupa); // <--- Zmiana: dodajemy do grupy, nie bezpośrednio do mapy
         wszystkieMarkery.push(marker);
 	    
@@ -661,6 +663,102 @@ const policzWidocznePunkty=()=> {
         }
         let table = arr.join("");
         $("#info").innerHTML += aktualizacja+"<h4>Udział % pakietów</h4><table>"+table+"</table>"
+
+
+
+
+
+
+
+
+
+// ***********************************************
+// NOWY KONTROLER: Wyszukiwarka Punktów
+// ***********************************************
+const SearchControl = L.Control.extend({
+    options: {
+        position: 'topright' // topleft topright Umieść w lewym górnym rogu, pod przełącznikiem przesuwania
+    },
+
+    onAdd: function (map) {
+        // Główny kontener
+        const container = L.DomUtil.create('div', 'search-control leaflet-bar');
+        
+        // Pole wprowadzania tekstu
+        container.innerHTML = `
+            <input type="text" id="search-input" placeholder="Wyszukaj punkt..." 
+                   style="padding: 5px; border: 1px solid #ccc; border-radius: 3px; width: 8em; font-size: 14px;">
+        `;
+        
+        const input = container.querySelector('#search-input');
+
+        // Zapobieganie zdarzeniom mapy
+        L.DomEvent.disableClickPropagation(container);
+        L.DomEvent.disableScrollPropagation(container);
+
+        // Dodanie logiki obsługi zdarzeń: filtrowanie przy każdym naciśnięciu klawisza
+        L.DomEvent.on(input, 'keyup', function() {
+            filtrMarkery(this.value.toLowerCase());
+        });
+
+        return container;
+    }
+});
+
+// Dodanie kontrolera wyszukiwania do mapy
+new SearchControl().addTo(map);
+
+
+// ***********************************************
+// NOWA FUNKCJA: Logika Filtrowania
+// ***********************************************
+function filtrMarkery(searchText) {
+    let znalezionePunkty = 0;
+
+    // Iterujemy po wszystkich globalnie zapisanych markerach
+    wszystkieMarkery.forEach(marker => {
+        // Odczytujemy oryginalny opis (zgodnie z wcześniej wprowadzonym ulepszeniem)
+        const opis = marker.options.originalDescription.toLowerCase();
+        console.log(opis)
+        
+        // Sprawdzenie, czy opis zawiera tekst wyszukiwania
+        if (opis.includes(searchText)) {
+            // Pokaż marker
+            // WAŻNE: W Leaflet do ukrycia markera najlepiej jest go usunąć z mapy
+            // a do pokazania go ponownie dodać
+            if (!map.hasLayer(marker)) {
+                // Musimy sprawdzić, czy jego grupa warstw jest AKTYWNA
+                // W tym celu potrzebujemy łatwego dostępu do grupy markera.
+                // Uprościmy to, zakładając, że jeśli marker jest w tablicy, to jego grupa została dodana.
+                // Najprościej: dodaj marker bezpośrednio, jeśli jest widoczny i jego grupa jest aktywna.
+                
+                // UWAGA: Dla uproszczenia, usuniemy go i dodamy do jego grupy.
+                const kategoria = marker.options.kategoria || "Inne"; // Nowa opcja! Patrz Krok 3
+                const grupa = kategorieGrupy[kategoria] || kategorieGrupy["Inne"];
+
+                // Sprawdź, czy cała grupa jest widoczna (czyli czy checkbox w filtrze jest zaznaczony)
+                if (map.hasLayer(grupa)) {
+                    marker.addTo(grupa);
+                    znalezionePunkty++;
+                }
+
+            } else {
+                 znalezionePunkty++;
+            }
+        } else {
+            // Ukryj marker
+            if (map.hasLayer(marker)) {
+                marker.remove();
+            }
+        }
+    });
+
+    console.log(`Znaleziono ${znalezionePunkty} punktów pasujących do frazy "${searchText}".`);
+}
+
+
+
+
 
 });
 // EOF domready async --------------------------------------------
