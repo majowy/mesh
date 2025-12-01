@@ -325,6 +325,7 @@ document.addEventListener("DOMContentLoaded",async (event)=>{
 	    // NOWY KROK: Obsługa zdarzenia po zakończeniu przesuwania
 	    // ***********************************************
 	    marker.on('moveend', function(e) {
+            return
 	        const newLatLng = marker.getLatLng();
 	        //console.log(`Punkt "${dane.opis}" przesunięto do: Lat ${newLatLng.lat.toFixed(6)}, Lng ${newLatLng.lng.toFixed(6)}`);
 	        
