@@ -1,7 +1,10 @@
 {
-	"position": "44.7%",
-	"text": "3.8%",
-	"nodeinfo": "20.7%",
-	"telemetry": "29.3%",
-	"traceroute": "1.5%"
+	"procent": {
+		"position": "44.4%",
+		"text": "3.4%",
+		"nodeinfo": "21.1%",
+		"telemetry": "29.7%",
+		"traceroute": "1.3%"
+	},
+	"aktualizacja": "1.12.2025, 08:35:33"
 }

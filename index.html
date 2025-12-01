@@ -57,7 +57,7 @@ const convert2Dat=(meshtNODE)=>{
         //if (!nod.latitude)  {delete meshtNODE[id]; continue;}
         //if (!nod.longitude) {delete meshtNODE[id]; continue;}
         
-        //console.log(id,nod);
+        console.log(id,nod);
         let obj = {}
         obj.id=id;
         let bgcolor = "#"+id.slice(-6);
@@ -79,7 +79,9 @@ const convert2Dat=(meshtNODE)=>{
                     //console.log("---",id,nod.shortname,"role=",roles[nod.role],nod)
                     notRole[id] = nod.shortname
                 }
-        obj.role =nod.role;
+        obj.time = (new Date(nod.timestamp*1000)).toLocaleString('pl-PL');
+        obj.role = nod.role;
+        obj.snr  = nod.snr;
         obj.hop  = nod.hop+"/"+nod.hops;
         obj.szczegolowy_opis = nod.longname;
         obj.info = `<span>Hop:${nod.hop}, Role:${roles[nod.role]}</span>`;
@@ -313,10 +315,11 @@ document.addEventListener("DOMContentLoaded",async (event)=>{
 	        <div style="font-family: sans-serif;">
 	            <h4 style="margin: 0 0 5px; color: ${kolor};">${dane.opis} <n>[${dane.km}km]</n></h4>
 	            <p style="margin: 0; font-size: 14px;">${dane.szczegolowy_opis}</p>
-	            <em>Role: <b>${dane.kategoria}</b>, hop:${dane.hop}<br />${dane.id}</em>
+	            <em>${dane.id}<b>  [${dane.kategoria}]</b><br /> hop:${dane.hop}, SNR=${dane.snr}dB</em>
+                <br />${dane.time}
 	        </div>
 	    `;
-	
+	//<em>Role: <b>${dane.kategoria}</b>, hop:${dane.hop}<br />${dane.id}, SNR=${dane.snr}dB</em>
 	    marker.bindPopup(popupContent, {
 	        offset: L.point(0, -30)
 	    });
@@ -647,16 +650,17 @@ const policzWidocznePunkty=()=> {
         //iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
         //iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
         let infoINFO = await runINFO();
-        //console.log(infoINFO);
+        console.log(infoINFO);
+        let aktualizacja= "<p><b>Aktualizacja:<br />"+infoINFO.aktualizacja+"</b></p>"
         //$("#info").innerHTML = JSON.stringify(infoINFO,null,4);
         let arr = [];
-        for (let key in infoINFO){
-            let val = infoINFO[key];
+        for (let key in infoINFO.procent){
+            let val = infoINFO.procent[key];
             //console.log(key,val);
             arr.push(`<tr><td>${key}</td><td>${val}</td></tr>`);
         }
         let table = arr.join("");
-        $("#info").innerHTML += "<h4>Udział % pakietów</h4><table>"+table+"</table>"
+        $("#info").innerHTML += aktualizacja+"<h4>Udział % pakietów</h4><table>"+table+"</table>"
 
 });
 // EOF domready async --------------------------------------------
