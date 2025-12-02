@@ -82,7 +82,14 @@ const convert2Dat=(meshtNODE)=>{
                     //console.log("---",id,nod.shortname,"role=",roles[nod.role],nod)
                     notRole[id] = nod.shortname
                 }
-        obj.time = (new Date(nod.timestamp*1000)).toLocaleString('pl-PL');
+            let time = nod.timestamp*1000;
+            obj.time = (new Date(time)).toLocaleString('pl-PL');
+            let tnow = (new Date()).getTime();
+            let doba = (tnow-time)/(1000*3600*24);
+                doba = Math.round(doba)
+            obj.doba = doba+"day";
+            //console.log("nd=",nod.doba,obj.time)
+        
         obj.role = nod.role;
         obj.snr  = nod.snr;
         obj.hop  = nod.hop+"/"+nod.hops;
@@ -307,7 +314,7 @@ document.addEventListener("DOMContentLoaded",async (event)=>{
 	    const marker = L.marker([dane.lat, dane.lon], { 
 	        icon: customIcon,
 	        iconAnchor: [0, 0],
-            originalDescription: dane.opis+" "+dane.long+" "+dane.id,// + " " + dane.kategoria, // dla wyszukiwania
+            originalDescription: dane.opis+" "+dane.long+" "+dane.id+" "+dane.doba,// + " " + dane.kategoria, // dla wyszukiwania
 	        draggable: true,
             kategoria: dane.kategoria // Zapisz kategorię, aby wiedzieć, do której grupy należy
 	    }).addTo(grupa); // <--- Zmiana: dodajemy do grupy, nie bezpośrednio do mapy
@@ -637,10 +644,11 @@ const policzWidocznePunkty=()=> {
             [53.22, 14.10],
             [53.26, 14.08]
         ];
+        
         const wierzcholkiINNE = [
             [53.30, 14.12],
-            [52.94, 14.12],
-            [52.94, 15.38],
+            [52.88, 14.12],
+            [52.88, 15.38],
             [53.30, 15.38],
         ];
 
@@ -775,6 +783,9 @@ function filtrMarkery(searchText) {
     });
 
     console.log(`Znaleziono ${znalezionePunkty} punktów pasujących do frazy "${searchText}".`);
+    $("#licznik").textContent = znalezionePunkty
+    //setTimeout(policzWidocznePunkty,500);
+    
 }
 
 
