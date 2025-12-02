@@ -30,6 +30,8 @@ table td, table th {
 }
 td:last-child {text-align: right;}
 .btn {background:#ddd;}
+.leaflet-right {width:150px;}
+.leaflet-touch .leaflet-control-layers, .leaflet-touch .leaflet-bar{border: none;}
 </style>
 </head>
 <body>
@@ -555,7 +557,7 @@ const policzWidocznePunkty=()=> {
                 const checkboxId = 'drag-toggle-checkbox';
 
                 container.innerHTML = `
-                    <div style="padding: 5px; background: white; border-radius: 3px;min-width: 9em; color:navy">
+                    <div style="padding: 5px; background: white; border-radius: 3px;min-width:126px; color:navy">
                         <input type="checkbox" id="${checkboxId}" checked>
                         <label for="${checkboxId}" style="margin-left: 5px; font-weight: bold;">
                             Przesuw ON
@@ -710,7 +712,7 @@ const SearchControl = L.Control.extend({
         // Pole wprowadzania tekstu
         container.innerHTML = `
             <input type="text" id="search-input" placeholder="Wyszukaj punkt..." 
-                   style="padding: 5px; border: 1px solid #ccc; border-radius: 3px; width: 8em; font-size: 14px;">
+                   style="padding: 5px; border: 1px solid #ccc; border-radius: 3px; width:126px; font-size: 14px;">
             <button id="clear-search" 
                     style="position: absolute; right: 0; top: 0; height: 100%; width: 15px; 
                            border: none; background: none; cursor: pointer; color: #888; 
@@ -816,7 +818,7 @@ function filtrMarkery(searchText) {
                 const container = L.DomUtil.create('div', 'sort-control leaflet-bar');
                 
                 container.innerHTML = `
-                    <select id="sort-select" style="padding: 5px; border: 1px solid #ccc; border-radius: 3px; font-size: 14px; margin-left: 5px;">
+                    <select id="sort-select" style="width:138px;padding: 5px; border: 1px solid #ccc; border-radius: 3px; font-size: 14px; margin-left: 5px;">
                         <option value="none">Aktywne od...</option>
                         <option value="1">6 godzin</option>
                         <option value="5">12 godzin</option>
