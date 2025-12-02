@@ -32,6 +32,7 @@ td:last-child {text-align: right;}
 .btn {background:#ddd;}
 .leaflet-right {width:150px;}
 .leaflet-touch .leaflet-control-layers, .leaflet-touch .leaflet-bar{border: none;}
+.leaflet-bottom.leaflet-right{width:initial;}
 </style>
 </head>
 <body>
@@ -51,12 +52,15 @@ const deltaLon =  0.09;
 let countFake  =  0;
 let nodeCount=0
 let daneJson={}
+let fakeGeo=0;
 
 const convert2Dat=(meshtNODE)=>{
 
 
     let arr = [];
-    let notRole={}
+    let notRole={};
+    let inneCNT=0;
+    let noGEO=0;
     for (id in meshtNODE){
         let nod = meshtNODE[id];
         //if (!nod.latitude)  {delete meshtNODE[id]; continue;}
@@ -72,15 +76,18 @@ const convert2Dat=(meshtNODE)=>{
         obj.txcolor = txcolor;
         obj.lat = parseInt(nod.latitude   || 0)/10000000;
         obj.lon = parseInt(nod.longitude  || 0)/10000000;
+        //console.log(obj.lat,obj.lon)
+        if (obj.lat===0 || obj.lon===0) noGEO++;
                             let geo=[];
                             geo[0] = obj.lat;
                             geo[1] = obj.lon;
-                            
+                            //console.log(geo)
                             let km = ok(geoKM(geo));
                             obj.km = km;
         obj.opis = nod.shortname;
         obj.long = nod.longname;
         obj.kategoria = roles[nod.role] || "Inne";
+        if (obj.kategoria==="Inne") inneCNT++;
                 if (!roles[nod.role]) {
                     //console.log("---",id,nod.shortname,"role=",roles[nod.role],nod)
                     notRole[id] = nod.shortname
@@ -106,7 +113,7 @@ const convert2Dat=(meshtNODE)=>{
         //console.log(bgcolor,txcolor)
         arr.push(obj)
     }
-    //console.log("notRole=",notRole)
+    console.log("inneCNT=",inneCNT,"noGEO=",noGEO)
     nodeCount = Object.keys(meshtNODE).length;
     return arr;
 }
@@ -195,6 +202,7 @@ document.addEventListener("DOMContentLoaded",async (event)=>{
             //let meshtNODE0 = JSON.parse(str_meshtNODE);
             //console.log(0,Object.keys(meshtNODE0).length);
             let meshtNODE = {}
+            
                     for (id in meshtNODE0){
                         let nod = meshtNODE0[id];
                         //console.log(0,id,nod.shortname, nod.latitude,nod.latitude,nod.role)
@@ -205,6 +213,7 @@ document.addEventListener("DOMContentLoaded",async (event)=>{
                                     let geo = fakePosition();
                                     nod.latitude  = geo[0]*10000000;
                                     nod.longitude = geo[1]*10000000;
+                                    fakeGeo++
                                     //console.log("fakePosition=",geo)
                                     //console.log("nod====",nod)
                                 }
@@ -219,6 +228,8 @@ document.addEventListener("DOMContentLoaded",async (event)=>{
                             }
                             meshtNODE[id] = nod;
                     }
+                    console.log("fakeGeo=",fakeGeo)
+                    //$(".fakeGeo").textContent = fakeGeo;
                     //console.log(1,Object.keys(meshtNODE).length);
                     for (id in meshtNODE){
                         let nod = meshtNODE[id];
@@ -632,11 +643,11 @@ const policzWidocznePunkty=()=> {
                                         const topLeft = bounds.getNorthWest();
                                         const kotwica = L.marker(topLeft, { opacity: 0.0, clickable: false }).addTo(map);
                                         const przesuniecie = L.point(10, 50); // 10px w prawo (X), 5px w dół (Y)
-                                        kotwica.bindTooltip("Nody bez lokalizacji", {
+                                        kotwica.bindTooltip("Nody bez lokalizacji: "+fakeGeo, {
                                             permanent: true,       // Tekst jest stale widoczny
                                             direction: 'top',      // Tekst pojawia się nad kotwicą
                                             offset: przesuniecie,  // Przesuń tekst nieco w prawo i w dół od granicy poligonu
-                                            className: 'polygon-label-top-left' // Własna klasa CSS
+                                            className: 'polygon-label-top-left fakeGeo' // Własna klasa CSS
                                         }).openTooltip();
                                         /*obszar.bindTooltip("Nody bez lokalizacji", {
                                             permanent: true,       // Tekst jest stale widoczny (nie tylko po najechaniu)
