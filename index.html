@@ -29,6 +29,7 @@ table td, table th {
     padding: 0.25em;
 }
 td:last-child {text-align: right;}
+.btn {background:#ddd;}
 </style>
 </head>
 <body>
@@ -47,7 +48,7 @@ const startLon = 14.2;
 const deltaLon =  0.09;
 let countFake  =  0;
 let nodeCount=0
-
+let daneJson={}
 
 const convert2Dat=(meshtNODE)=>{
 
@@ -86,8 +87,11 @@ const convert2Dat=(meshtNODE)=>{
             obj.time = (new Date(time)).toLocaleString('pl-PL');
             let tnow = (new Date()).getTime();
             let doba = (tnow-time)/(1000*3600*24);
-                doba = Math.round(doba)
-            obj.doba = doba+"day";
+            let godzin = ok((tnow-time)/(1000*3600));
+  
+            obj.doba = Math.round(doba)+"day";
+            obj.data_dodania = godzin;
+            
             //console.log("nd=",nod.doba,obj.time)
         
         obj.role = nod.role;
@@ -155,6 +159,10 @@ const showOrNot=(flag=true)=>{
         }
     });
     //policzWidocznePunkty();
+}
+
+const showSearch=(action=null)=>{
+    console.log(action)
 }
 
 const pallete=["#FF0000","#008800","#0000FF","#FF00FF","#000000","#800000","#00FFFF","#808000","#008000","#800080","#008080","#000080","#808080","#C0C0C0","#FFA500","#FFFF00"];
@@ -394,7 +402,11 @@ const FilterControl = L.Control.extend({
         });
 
         htmlContent += "<button onclick='showOrNot(false)'>Nic</button>";
-        htmlContent += "<button onclick='showOrNot(true)'>Wszystko</button>";
+        htmlContent += "<button onclick='showOrNot(true)'>Wszystko</button><br />";
+        
+        htmlContent += "<button class='btn' onclick='showSearch(\"newer\")'>New</button>";
+        htmlContent += "<button class='btn' onclick='showSearch(\"actual\")'>Actual</button>";
+        htmlContent += "<button class='btn' onclick='showSearch(\"day\")'>24h</button>";
         
         container.innerHTML = htmlContent;
 
@@ -427,6 +439,7 @@ const FilterControl = L.Control.extend({
       new FilterControl().addTo(map);
 
             let nodeJson = convert2Dat(meshtNODE);
+            daneJson = nodeJson;
             //console.log(nodeJson);
             
             //console.log(daneJson)
@@ -783,13 +796,114 @@ function filtrMarkery(searchText) {
     });
 
     console.log(`Znaleziono ${znalezionePunkty} punktów pasujących do frazy "${searchText}".`);
-    $("#licznik").textContent = znalezionePunkty
+    $("#licznik").textContent = Object.keys(znalezionePunkty).length;
     //setTimeout(policzWidocznePunkty,500);
     
 }
 
 
 
+
+        // ***********************************************
+        // NOWY KONTROLER: Sortowanie/Filtrowanie wg Daty
+        // ***********************************************
+        const SortControl = L.Control.extend({
+            options: {
+                position: 'topright' //  topleft Umieść w lewym górnym rogu
+            },
+
+            onAdd: function (map) {
+                const container = L.DomUtil.create('div', 'sort-control leaflet-bar');
+                
+                container.innerHTML = `
+                    <select id="sort-select" style="padding: 5px; border: 1px solid #ccc; border-radius: 3px; font-size: 14px; margin-left: 5px;">
+                        <option value="none">Aktywne od...</option>
+                        <option value="1">1 godzina</option>
+                        <option value="5">5 godzin</option>
+                        <option value="24">24 godziny</option>
+                        <option value="72">3 doby</option>
+                        <option value="0">zawsze</option>
+                    </select>
+                `;
+                
+                const select = container.querySelector('#sort-select');
+
+                L.DomEvent.disableClickPropagation(container);
+                L.DomEvent.disableScrollPropagation(container);
+
+                // Wywołanie funkcji sortującej przy zmianie wyboru
+                L.DomEvent.on(select, 'change', function() {
+                    sortujPunkty(this.value);
+                });
+
+                return container;
+            }
+        });
+
+        // Dodanie kontrolera sortowania do mapy
+        new SortControl().addTo(map);
+
+        /**
+ * Usuwa wszystkie markery z mapy, sortuje daneJson i dodaje markery ponownie.
+ * @param {string} kryterium 'najnowsze', 'najstarsze' lub 'none'.
+ */
+function sortujPunkty(kryterium) {
+    // 1. Czyszczenie mapy (usuwanie wszystkich markerów z wszystkich grup)
+    wszystkieMarkery.forEach(marker => marker.remove());
+    wszystkieMarkery.length = 0; // Opróżnienie globalnej tablicy markerów
+    
+    // Upewnij się, że grupy są puste po usunięciu
+    Object.values(kategorieGrupy).forEach(grupa => grupa.clearLayers());
+
+
+    let posortowaneDane = [...daneJson]; // Tworzenie kopii danych do sortowania
+//let teraz = (new Date()).getTime();
+let delta = parseInt(kryterium);
+
+if (delta > 0) posortowaneDane = posortowaneDane.filter((a) => a.data_dodania<delta);
+//console.log(delta,posortowaneDane);
+$("#licznik").textContent = posortowaneDane.length
+/*
+    // 2. Sortowanie danych
+    if (kryterium === 'najnowsze') {
+        // Sortowanie malejące (najnowsze daty na górze)
+        posortowaneDane.sort((a, b) => new Date(b.data_dodania) - new Date(a.data_dodania));
+        console.log("Sortowanie: Najnowsze");
+    } else if (kryterium === 'najstarsze') {
+        // Sortowanie rosnące (najstarsze daty na górze)
+        posortowaneDane.sort((a, b) => new Date(a.data_dodania) - new Date(b.data_dodania));
+        console.log("Sortowanie: Najstarsze");
+    } else {
+        // Brak sortowania, powrót do kolejności oryginalnej (lub po prostu dodanie bez zmian)
+        posortowaneDane = daneJson;
+        console.log("Sortowanie wyłączone.");
+    }
+*/
+    // 3. Ponowne dodawanie markerów w nowej, posortowanej kolejności
+    posortowaneDane.forEach(dane => {
+        // Sprawdź, czy marker ma zostać dodany do aktywnej grupy (zgodnie z filtrem kategorii)
+        const grupa = kategorieGrupy[dane.kategoria] || kategorieGrupy["Inne"];
+        
+        // Ponowne użycie funkcji tworzenia markera
+        const marker = utworzCustomMarker(dane); // Funkcja utworzCustomMarker dodaje marker do 'wszystkieMarkery' i jego grupy
+
+        // UWAGA: Trzeba upewnić się, że marker jest widoczny, jeśli jego grupa jest aktywna
+        if (map.hasLayer(grupa)) {
+             // Jeśli grupa jest aktywna, nic nie robimy - marker został dodany do mapy w utworzCustomMarker.
+        } else {
+             // Jeśli grupa jest nieaktywna (checkbox wyłączony), usuwamy marker z mapy.
+             // (Choć technicznie jest w grupie, grupa nie jest na mapie, więc jest OK)
+             marker.remove();
+        }
+    });
+
+    // 4. Po sortowaniu warto wywołać funkcję filtrującą z aktualną frazą,
+    // aby zachować filtr wyszukiwania, jeśli był aktywny.
+    const searchInput = document.getElementById('search-input');
+    if (searchInput && searchInput.value) {
+        filtrMarkery(searchInput.value.toLowerCase());
+    }
+}
 
 
 });
