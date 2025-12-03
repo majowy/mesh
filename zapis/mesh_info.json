@@ -1,12 +1,12 @@
 {
-	"nodeCount": 147,
+	"nodeCount": 151,
 	"procent": {
-		"position": "44.1%",
+		"position": "44.3%",
 		"text": "3.7%",
 		"nodeinfo": "21%",
-		"telemetry": "29.9%",
+		"telemetry": "29.8%",
 		"traceroute": "1.2%"
 	},
-	"timestamp": 1764772773001,
-	"aktualizacja": "3.12.2025, 15:39:33"
+	"timestamp": 1764784745752,
+	"aktualizacja": "3.12.2025, 18:59:05"
 }
