@@ -45,10 +45,7 @@ td:last-child {text-align: right;}
     
 <script>
 
-let   startLat = 53.17;
-const deltaLat =  0.07;
-const startLon = 14.2;
-const deltaLon =  0.09;
+
 let deltaTime = 0;
 let deltaHour = 0;
 let countFake  =  0;
@@ -145,15 +142,7 @@ const hexToRgb=(hex) =>{
         if(brightness < 150){return("white")} 
         else {return("black")}
     }   
-  
-const fakePosition=()=>{
-    countFake++;
-    if (countFake>10) {
-        countFake = 1;
-        startLat-=deltaLat;
-    }
-	return [startLat,startLon+okk(deltaLon*countFake)];
-}    
+   
 const showOrNot=(flag=true)=>{
     let aless = document.querySelectorAll('input[type=checkbox]');
 
@@ -171,6 +160,20 @@ const showOrNot=(flag=true)=>{
     });
     //policzWidocznePunkty();
 }
+
+let   startLat = 53.17;
+const deltaLat =  0.07;
+const startLon = 14.2;
+const deltaLon =  0.09;
+
+const fakePosition=()=>{
+    countFake++;
+    if (countFake>10) {
+        countFake = 1;
+        startLat-=deltaLat;
+    }
+	return [startLat,startLon+okk(deltaLon*countFake)];
+}  
 
 const showSearch=(action=null)=>{
     console.log(action)
@@ -686,18 +689,18 @@ const policzWidocznePunkty=()=> {
         }
 
         // Przykład użycia (zaznaczenie centrum Warszawy)
-        const wierzcholkiWarszawy = [
+        /*const wierzcholkiWarszawy = [
             [53.25, 14.00],
             [53.20, 14.05],
             [53.22, 14.10],
             [53.26, 14.08]
-        ];
+        ];*/
         
         const wierzcholkiINNE = [
             [53.30, 14.12],
-            [52.88, 14.12],
-            [52.88, 15.38],
-            [53.30, 15.38],
+            [52.84, 14.12],
+            [52.84, 15.32],
+            [53.30, 15.32],
         ];
 
         const zaznaczINNE=()=>{
@@ -857,6 +860,8 @@ function filtrMarkery(searchText) {
                 container.innerHTML = `
                     <select id="sort-select" style="width:138px;padding: 5px; border: 1px solid #ccc; border-radius: 3px; font-size: 14px; margin-left: 5px;">
                         <option value="none">Aktywne od...</option>
+                        <option value="${deltaHour+1}" >1 godzin</option>
+                        <option value="${deltaHour+2}" >2 godzin</option>
                         <option value="${deltaHour+3}" >3 godzin</option>
                         <option value="${deltaHour+6}" >6 godzin</option>
                         <option value="${deltaHour+12}">12 godzin</option>
