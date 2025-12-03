@@ -49,6 +49,8 @@ let   startLat = 53.17;
 const deltaLat =  0.07;
 const startLon = 14.2;
 const deltaLon =  0.09;
+let deltaTime = 0;
+let deltaHour = 0;
 let countFake  =  0;
 let nodeCount=0
 let daneJson={}
@@ -688,7 +690,11 @@ const policzWidocznePunkty=()=> {
         //iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
         //iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
         let infoINFO = await runINFO();
-        //console.log(infoINFO);
+        console.log(infoINFO);
+        let nowtime = (new Date().getTime())
+        deltaTime = nowtime - infoINFO.timestamp;
+        deltaHour = Math.round((deltaTime/(1000*3600)))
+        console.log("deltaTime",deltaTime,deltaHour);
         let aktualizacja= "<p><b>Aktualizacja:<br />"+infoINFO.aktualizacja+"</b></p>"
         //$("#info").innerHTML = JSON.stringify(infoINFO,null,4);
         let arr = [];
@@ -831,10 +837,11 @@ function filtrMarkery(searchText) {
                 container.innerHTML = `
                     <select id="sort-select" style="width:138px;padding: 5px; border: 1px solid #ccc; border-radius: 3px; font-size: 14px; margin-left: 5px;">
                         <option value="none">Aktywne od...</option>
-                        <option value="1">6 godzin</option>
-                        <option value="5">12 godzin</option>
-                        <option value="24">24 godziny</option>
-                        <option value="72">3 doby</option>
+                        <option value="${deltaHour+3}" >${deltaHour+3} godzin</option>
+                        <option value="${deltaHour+6}" >${deltaHour+6} godzin</option>
+                        <option value="${deltaHour+12}">${deltaHour+12} godzin</option>
+                        <option value="${deltaHour+24}">${deltaHour+24} godzin</option>
+                        <option value="${deltaHour+72}">${deltaHour+72} godzin</option>
                         <option value="0">Wszystko</option>
                     </select>
                 `;
