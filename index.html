@@ -278,13 +278,19 @@ document.addEventListener("DOMContentLoaded",async (event)=>{
     //console.log(kategoriaKolor)
 	// 3. Inicjalizacja mapy
 	map = L.map('map').setView([52.0, 19.0], 6);
-	
+	/*
 	// 4. Dodanie warstwy OpenStreetMap
-	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-	    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-	}).addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
 
-	
+	// Dodanie wskaźnika odległości
+        L.control.scale({
+            imperial: false, // Wyłącza jednostki imperialne (mile, stopy)
+            metric: true,    // Włącza jednostki metryczne (kilometry, metry)
+            maxWidth: 200    // Maksymalna szerokość wskaźnika w pikselach
+        }).addTo(map);
+        */
 	// ***********************************************
 	// NOWE KROKI DLA FILTRA: Grupy Warstw
 	// ***********************************************
@@ -377,6 +383,20 @@ document.addEventListener("DOMContentLoaded",async (event)=>{
 	    return marker;
 	}
 
+
+    // 4. Dodanie warstwy OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // ***********************************************
+    // NOWY KROK: Dodanie wskaźnika skali
+    // ***********************************************
+    L.control.scale({
+        imperial: false,
+        metric: true,
+        maxWidth: 150    // Maksymalna szerokość wskaźnika w pikselach
+    }).addTo(map);
 
 const mapaMAPA=(daneJson)=>{
     // 6. Przetwarzanie danych JSON i dodawanie markerów
@@ -837,11 +857,11 @@ function filtrMarkery(searchText) {
                 container.innerHTML = `
                     <select id="sort-select" style="width:138px;padding: 5px; border: 1px solid #ccc; border-radius: 3px; font-size: 14px; margin-left: 5px;">
                         <option value="none">Aktywne od...</option>
-                        <option value="${deltaHour+3}" >${deltaHour+3} godzin</option>
-                        <option value="${deltaHour+6}" >${deltaHour+6} godzin</option>
-                        <option value="${deltaHour+12}">${deltaHour+12} godzin</option>
-                        <option value="${deltaHour+24}">${deltaHour+24} godzin</option>
-                        <option value="${deltaHour+72}">${deltaHour+72} godzin</option>
+                        <option value="${deltaHour+3}" >3 godzin</option>
+                        <option value="${deltaHour+6}" >6 godzin</option>
+                        <option value="${deltaHour+12}">12 godzin</option>
+                        <option value="${deltaHour+24}">24 godzin</option>
+                        <option value="${deltaHour+72}">3 dni</option>
                         <option value="0">Wszystko</option>
                     </select>
                 `;
