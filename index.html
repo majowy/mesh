@@ -33,6 +33,7 @@ td:last-child {text-align: right;}
 .leaflet-right {width:150px;}
 .leaflet-touch .leaflet-control-layers, .leaflet-touch .leaflet-bar{border: none;}
 .leaflet-bottom.leaflet-right{width:initial;}
+.novisible {visibility:hidden}
 </style>
 </head>
 <body>
@@ -40,11 +41,12 @@ td:last-child {text-align: right;}
     <div id="map"></div>
 
     <pre id="info"></pre>
+    <button id="mojPrzycisk" class="novisible">mojPrzycisk</button>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     
 <script>
-
+const przycisk = document.getElementById("mojPrzycisk");
 
 let deltaTime = 0;
 let deltaHour = 0;
@@ -159,6 +161,8 @@ const showOrNot=(flag=true)=>{
         }
     });
     //policzWidocznePunkty();
+    //sortujPunkty(0);
+    przycisk.click()
 }
 
 let   startLat = 53.17;
@@ -861,12 +865,12 @@ function filtrMarkery(searchText) {
                     <select id="sort-select" style="width:138px;padding: 5px; border: 1px solid #ccc; border-radius: 3px; font-size: 14px; margin-left: 5px;">
                         <option value="none">Aktywne od...</option>
                         <option value="${deltaHour+1}" >1 godzin</option>
-                        <option value="${deltaHour+2}" >2 godzin</option>
                         <option value="${deltaHour+3}" >3 godzin</option>
                         <option value="${deltaHour+6}" >6 godzin</option>
                         <option value="${deltaHour+12}">12 godzin</option>
                         <option value="${deltaHour+24}">24 godzin</option>
                         <option value="${deltaHour+72}">3 dni</option>
+                        <option value="${deltaHour+168}">7 dni</option>
                         <option value="0">Wszystko</option>
                     </select>
                 `;
@@ -892,7 +896,8 @@ function filtrMarkery(searchText) {
  * Usuwa wszystkie markery z mapy, sortuje daneJson i dodaje markery ponownie.
  * @param {string} kryterium 'najnowsze', 'najstarsze' lub 'none'.
  */
-function sortujPunkty(kryterium) {
+function sortujPunkty(kryterium=0) {
+    //console.log(kryterium)
     // 1. Czyszczenie mapy (usuwanie wszystkich markerów z wszystkich grup)
     wszystkieMarkery.forEach(marker => marker.remove());
     wszystkieMarkery.length = 0; // Opróżnienie globalnej tablicy markerów
@@ -951,6 +956,14 @@ $("#licznik").textContent = posortowaneDane.length
 }
 
 
+// To jest funkcja, którą chcemy wywołać:
+  const obslugaKlikniecia = () => {
+    //console.log("Przycisk został kliknięty (lub wywołany programowo)!");
+    sortujPunkty(0);
+  };
+
+  przycisk.addEventListener("click", obslugaKlikniecia);
+
 });
 // EOF domready async --------------------------------------------
 // EOF domready async --------------------------------------------
@@ -960,5 +973,12 @@ $("#licznik").textContent = posortowaneDane.length
 
 
 </script>
+
+
+
 </body>
 </html>
+
+
+
+
