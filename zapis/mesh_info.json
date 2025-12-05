@@ -1,4 +1,5 @@
 {
+	"nodeCount": 154,
 	"procent": {
 		"position": "44.3%",
 		"text": "3.3%",
@@ -6,7 +7,6 @@
 		"telemetry": "30.2%",
 		"traceroute": "1.1%"
 	},
-	"timestamp": 1764913664926,
-	"aktualizacja": "5.12.2025, 06:47:44",
-	"nodeCount": 154
+	"timestamp": 1764914910223,
+	"aktualizacja": "5.12.2025, 07:08:30"
 }
