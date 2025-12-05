@@ -34,6 +34,7 @@ td:last-child {text-align: right;}
 .leaflet-touch .leaflet-control-layers, .leaflet-touch .leaflet-bar{border: none;}
 .leaflet-bottom.leaflet-right{width:initial;}
 .novisible {visibility:hidden}
+.btn-main {background: #fda; border-color:red}
 </style>
 </head>
 <body>
@@ -42,11 +43,13 @@ td:last-child {text-align: right;}
 
     <pre id="info"></pre>
     <button id="mojPrzycisk" class="novisible">mojPrzycisk</button>
+    <button id="mojPrzycisk3h" class="novisible">mojPrzycisk3h</button>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     
 <script>
 const przycisk = document.getElementById("mojPrzycisk");
+const przycisk3h = document.getElementById("mojPrzycisk3h");
 
 let deltaTime = 0;
 let deltaHour = 0;
@@ -146,6 +149,7 @@ const hexToRgb=(hex) =>{
     }   
    
 const showOrNot=(flag=true)=>{
+    if (flag===-1) {active3h(); return}
     let aless = document.querySelectorAll('input[type=checkbox]');
 
     [...aless].forEach((input,i)=>{
@@ -164,7 +168,10 @@ const showOrNot=(flag=true)=>{
     //sortujPunkty(0);
     przycisk.click()
 }
-
+const active3h=()=>{
+    //console.log("active3h")
+    przycisk3h.click()
+}
 let   startLat = 53.17;
 const deltaLat =  0.07;
 const startLon = 14.2;
@@ -430,7 +437,8 @@ const FilterControl = L.Control.extend({
         
         // Zbudowanie HTML dla listy checkboxów
         let htmlContent = `<h4>Node: <span id="licznik">${Object.keys(meshtNODE).length}</span></h4>`;
-        
+        htmlContent += "<button onclick='showOrNot(-1)' class='btn-main'>Aktywne</button><br />";
+
         Object.keys(kategorieGrupy).forEach((kategoria,i) => {
             const id = 'filter-' + kategoria.toLowerCase();
             const kolor = kategoriaKolor[kategoria] || kategoriaKolor["Inne"];
@@ -442,9 +450,10 @@ const FilterControl = L.Control.extend({
                 </label>
             `;
         });
-
+        
         htmlContent += "<button onclick='showOrNot(false)'>Nic</button>";
         htmlContent += "<button onclick='showOrNot(true)'>Wszystko</button>";
+        
         
         //htmlContent += "<button class='btn' onclick='showSearch(\"newer\")'>New</button>";
         //htmlContent += "<button class='btn' onclick='showSearch(\"actual\")'>Actual</button>";
@@ -871,6 +880,7 @@ function filtrMarkery(searchText) {
                         <option value="${deltaHour+24}">24 godzin</option>
                         <option value="${deltaHour+72}">3 dni</option>
                         <option value="${deltaHour+168}">7 dni</option>
+                        <option value="-${deltaHour+168}">Prastare</option>
                         <option value="0">Wszystko</option>
                     </select>
                 `;
@@ -909,8 +919,9 @@ function sortujPunkty(kryterium=0) {
     let posortowaneDane = [...daneJson]; // Tworzenie kopii danych do sortowania
 //let teraz = (new Date()).getTime();
 let delta = parseInt(kryterium);
-
+console.log("delta=",delta)
 if (delta > 0) posortowaneDane = posortowaneDane.filter((a) => a.data_dodania<delta);
+if (delta < 0) posortowaneDane = posortowaneDane.filter((a) => a.data_dodania>(-delta));
 //console.log(delta,posortowaneDane);
 $("#licznik").textContent = posortowaneDane.length
 /*
@@ -961,8 +972,13 @@ $("#licznik").textContent = posortowaneDane.length
     //console.log("Przycisk został kliknięty (lub wywołany programowo)!");
     sortujPunkty(0);
   };
-
   przycisk.addEventListener("click", obslugaKlikniecia);
+
+
+  const obslugaActive3h = () => {
+    sortujPunkty(3);
+  };
+  przycisk3h.addEventListener("click", obslugaActive3h);
 
 });
 // EOF domready async --------------------------------------------
