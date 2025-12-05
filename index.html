@@ -42,13 +42,13 @@ td:last-child {text-align: right;}
     <div id="map"></div>
 
     <pre id="info"></pre>
-    <button id="mojPrzycisk" class="novisible">mojPrzycisk</button>
+    <button id="mojPrzyciskAll" class="novisible">mojPrzyciskAll</button>
     <button id="mojPrzycisk3h" class="novisible">mojPrzycisk3h</button>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     
 <script>
-const przycisk = document.getElementById("mojPrzycisk");
+const przyciskAll = document.getElementById("mojPrzyciskAll");
 const przycisk3h = document.getElementById("mojPrzycisk3h");
 
 let deltaTime = 0;
@@ -166,12 +166,15 @@ const showOrNot=(flag=true)=>{
     });
     //policzWidocznePunkty();
     //sortujPunkty(0);
-    przycisk.click()
+    przyciskAll.click()
 }
 const active3h=()=>{
     //console.log("active3h")
     przycisk3h.click()
 }
+
+
+
 let   startLat = 53.17;
 const deltaLat =  0.07;
 const startLon = 14.2;
@@ -436,7 +439,7 @@ const FilterControl = L.Control.extend({
         const container = L.DomUtil.create('div', 'filter-control leaflet-bar');
         
         // Zbudowanie HTML dla listy checkboxów
-        let htmlContent = `<h4>Node: <span id="licznik">${Object.keys(meshtNODE).length}</span></h4>`;
+        let htmlContent = `<h4>Node: <span title="visible" id="licznik">${Object.keys(meshtNODE).length}</span> {<span title="active" id="liczActive"></span>}</h4>`;
         htmlContent += "<button onclick='showOrNot(-1)' class='btn-main'>Aktywne</button><br />";
 
         Object.keys(kategorieGrupy).forEach((kategoria,i) => {
@@ -552,6 +555,8 @@ const policzWidocznePunkty=()=> {
     const wynik = `Na mapie widoczne są ${licznik} punkty.`;
     const szczegoly = licznik > 0 ? `Widoczne punkty: ${widocznePunkty.join(', ')}` : '';
     $("#licznik").textContent = licznik
+    
+    
     //alert(`${wynik}\n${szczegoly}`);
 	    
 	    //console.log(wynik);
@@ -724,12 +729,20 @@ const policzWidocznePunkty=()=> {
 
         //iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
         //iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
+        const getDeltaHout=(timestamp)=>{
+            let nowtime = (new Date().getTime())
+            deltaTime = nowtime - infoINFO.timestamp;
+            deltaHour = Math.round((deltaTime/(1000*3600)));
+            return deltaHour;
+        }
         //iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
         let infoINFO = await runINFO();
         console.log(infoINFO);
-        let nowtime = (new Date().getTime())
-        deltaTime = nowtime - infoINFO.timestamp;
-        deltaHour = Math.round((deltaTime/(1000*3600)))
+        //let nowtime = (new Date().getTime())
+        //deltaTime = nowtime - infoINFO.timestamp;
+        //deltaHour = Math.round((deltaTime/(1000*3600)))
+        //console.log("deltaTime",deltaTime,deltaHour);
+        deltaHour = getDeltaHout(infoINFO.timestamp)
         console.log("deltaTime",deltaTime,deltaHour);
         let aktualizacja= "<p><b>Aktualizacja:<br />"+infoINFO.aktualizacja+"</b></p>"
         //$("#info").innerHTML = JSON.stringify(infoINFO,null,4);
@@ -873,14 +886,14 @@ function filtrMarkery(searchText) {
                 container.innerHTML = `
                     <select id="sort-select" style="width:138px;padding: 5px; border: 1px solid #ccc; border-radius: 3px; font-size: 14px; margin-left: 5px;">
                         <option value="none">Aktywne od...</option>
-                        <option value="${deltaHour+1}" >1 godzin</option>
-                        <option value="${deltaHour+3}" >3 godzin</option>
-                        <option value="${deltaHour+6}" >6 godzin</option>
-                        <option value="${deltaHour+12}">12 godzin</option>
-                        <option value="${deltaHour+24}">24 godzin</option>
-                        <option value="${deltaHour+72}">3 dni</option>
-                        <option value="${deltaHour+168}">7 dni</option>
-                        <option value="-${deltaHour+168}">Prastare</option>
+                        <option value="1" >1 godzin</option>
+                        <option value="3" >3 godzin</option>
+                        <option value="6" >6 godzin</option>
+                        <option value="12">12 godzin</option>
+                        <option value="24">24 godzin</option>
+                        <option value="72">3 dni</option>
+                        <option value="168">7 dni</option>
+                        <option value="-168">Prastare</option>
                         <option value="0">Wszystko</option>
                     </select>
                 `;
@@ -906,8 +919,13 @@ function filtrMarkery(searchText) {
  * Usuwa wszystkie markery z mapy, sortuje daneJson i dodaje markery ponownie.
  * @param {string} kryterium 'najnowsze', 'najstarsze' lub 'none'.
  */
-function sortujPunkty(kryterium=0) {
-    //console.log(kryterium)
+function sortujPunkty(ileHour="0") {
+    deltaHour = getDeltaHout(infoINFO.timestamp);
+    let kryterium = parseInt(ileHour)+deltaHour+1;
+    if (ileHour==="0") kryterium = 0;
+    //console.log("sortujPunkty deltaTime",deltaTime,deltaHour);
+
+    //console.log("sortujPunkty kryterium=",kryterium,"ileHour=",ileHour,"deltaHour=",deltaHour)
     // 1. Czyszczenie mapy (usuwanie wszystkich markerów z wszystkich grup)
     wszystkieMarkery.forEach(marker => marker.remove());
     wszystkieMarkery.length = 0; // Opróżnienie globalnej tablicy markerów
@@ -919,11 +937,12 @@ function sortujPunkty(kryterium=0) {
     let posortowaneDane = [...daneJson]; // Tworzenie kopii danych do sortowania
 //let teraz = (new Date()).getTime();
 let delta = parseInt(kryterium);
-console.log("delta=",delta)
+//console.log("delta=",delta)
 if (delta > 0) posortowaneDane = posortowaneDane.filter((a) => a.data_dodania<delta);
 if (delta < 0) posortowaneDane = posortowaneDane.filter((a) => a.data_dodania>(-delta));
 //console.log(delta,posortowaneDane);
-$("#licznik").textContent = posortowaneDane.length
+$("#licznik").textContent = posortowaneDane.length;
+if (ileHour==="3") $("#liczActive").textContent = posortowaneDane.length;
 /*
     // 2. Sortowanie danych
     if (kryterium === 'najnowsze') {
@@ -968,17 +987,22 @@ $("#licznik").textContent = posortowaneDane.length
 
 
 // To jest funkcja, którą chcemy wywołać:
-  const obslugaKlikniecia = () => {
+  const obslugaClickAll = () => {
     //console.log("Przycisk został kliknięty (lub wywołany programowo)!");
-    sortujPunkty(0);
+    sortujPunkty("0");
   };
-  przycisk.addEventListener("click", obslugaKlikniecia);
+  przyciskAll.addEventListener("click", obslugaClickAll);
 
 
   const obslugaActive3h = () => {
-    sortujPunkty(3);
+    sortujPunkty("3");
   };
   przycisk3h.addEventListener("click", obslugaActive3h);
+
+
+przycisk3h.click()
+przyciskAll.click()
+//active3h()
 
 });
 // EOF domready async --------------------------------------------
