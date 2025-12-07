@@ -117,7 +117,7 @@ const convert2Dat=(meshtNODE)=>{
         //console.log(bgcolor,txcolor)
         arr.push(obj)
     }
-    console.log("inneCNT=",inneCNT,"noGEO=",noGEO)
+    //console.log("inneCNT=",inneCNT,"noGEO=",noGEO)
     nodeCount = Object.keys(meshtNODE).length;
     return arr;
 }
@@ -737,13 +737,13 @@ const policzWidocznePunkty=()=> {
         }
         //iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
         let infoINFO = await runINFO();
-        console.log(infoINFO);
+        //console.log(infoINFO);
         //let nowtime = (new Date().getTime())
         //deltaTime = nowtime - infoINFO.timestamp;
         //deltaHour = Math.round((deltaTime/(1000*3600)))
         //console.log("deltaTime",deltaTime,deltaHour);
         deltaHour = getDeltaHout(infoINFO.timestamp)
-        console.log("deltaTime",deltaTime,deltaHour);
+        //console.log("deltaTime",deltaTime,deltaHour);
         let aktualizacja= "<p><b>Aktualizacja:<br />"+infoINFO.aktualizacja+"</b></p>"
         //$("#info").innerHTML = JSON.stringify(infoINFO,null,4);
         let arr = [];
