@@ -198,14 +198,14 @@ const roles = ["CLIENT","CLIENT_MUTE","ROUTER","ROUTER_CLIENT","REPEATER","TRACK
 let kategorieGrupy = {};
 let map = null;
 
-const punktyURL = "./zapis/mesh_nodes.json";
-const infoURL   = "./zapis/mesh_info.json";
+const nodesURL = "./zapis/mesh_meshtNODE.json";
+const infosURL   = "./zapis/mesh_meshtINFO.json";
 
 const runRUN=async()=>{
-	return await asyncFetchJson(punktyURL); 
+	return await asyncFetchJson(nodesURL); 
 }
 const runINFO=async()=>{
-	return await asyncFetchJson(infoURL); 
+	return await asyncFetchJson(infosURL); 
 }
 
 
