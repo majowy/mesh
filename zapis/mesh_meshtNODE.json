@@ -116,7 +116,7 @@
 		"hops": 7,
 		"shortname": "85dc",
 		"longname": "HF1MM tracker  85dc",
-		"timestamp": 1764358137,
+		"timestamp": 1764798077,
 		"snr": -13.5,
 		"rssi": -84,
 		"hardware": 48,
@@ -1952,11 +1952,11 @@
 	"!43b6b45c": {
 		"hop": 6,
 		"hops": 7,
-		"timestamp": 1764356442,
+		"timestamp": 1764942885,
 		"snr": 10.75,
 		"rssi": -65,
-		"shortname": "b45c",
-		"longname": "Meshtastic b45c",
+		"shortname": "BHQp",
+		"longname": "Piotrek SQ1BHQ b45c",
 		"hardware": 43,
 		"role": 1
 	},
@@ -2421,13 +2421,13 @@
 	"!9ea0c0b8": {
 		"hop": 3,
 		"hops": 7,
-		"timestamp": 1765287679,
+		"timestamp": 1765282063,
 		"snr": 10.25,
 		"rssi": -82,
-		"shortname": "c0b8",
-		"longname": "Meshtastic c0b8",
+		"shortname": "CN19",
+		"longname": "CrookedNose EP01",
 		"hardware": 49,
-		"role": 1
+		"role": 0
 	},
 	"!9ea2a940": {
 		"hop": 3,
