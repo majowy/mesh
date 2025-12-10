@@ -1059,9 +1059,9 @@
 	"!9716edbc": {
 		"hop": 2,
 		"hops": 7,
-		"timestamp": 1765361196,
-		"snr": 11,
-		"rssi": -53,
+		"timestamp": 1765364796,
+		"snr": 10.75,
+		"rssi": -49,
 		"latitude": 533640100,
 		"longitude": 146005800,
 		"hops_away": 2,
@@ -1069,11 +1069,11 @@
 		"longname": "MSI",
 		"hardware": 81,
 		"role": 2,
-		"Autil": 0.76,
-		"Cutil": 0,
+		"Autil": 1.04,
+		"Cutil": 2.1,
 		"bat": 101,
 		"vol": 0,
-		"uptime": 916287
+		"uptime": 919887
 	},
 	"!4ed36e3c": {
 		"hop": 5,
@@ -2460,6 +2460,8 @@
 		"Cutil": 1.41,
 		"bat": 99,
 		"vol": 4.18,
-		"uptime": 65
+		"uptime": 65,
+		"shortname": "dc40",
+		"longname": "!193cdc40"
 	}
 }
