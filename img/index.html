@@ -42,7 +42,7 @@
         let links="";
         images.forEach((im,i)=>{
 			let nr=i+1;
-          	if (i>0) links += `<a href=./?img="${nr}">${images[img]}</a> `;
+          	if (i>0) links += `<a href=./?img="${nr}">${images[nr]}</a> `;
         });
         $("#links").innerHTML = links;
         let params = new URLSearchParams(document.location.search);
