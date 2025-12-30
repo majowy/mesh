@@ -33,21 +33,22 @@
     const $=e=>document.querySelector(e);
     const $$=e=>document.querySelectorAll(e);
     const images=[
-      "ION1-21.12.jpg",
+      " ",
       "ION1-21.12.jpg",
     ];
     //---dom ready--------------------------------
     document.addEventListener("DOMContentLoaded",function(){
         let links="";
-        images.forEach((im)=>{
-          links += `<a href=""></a> `;
+        images.forEach((im,i)=>{
+			let nr=i+1;
+          	if (i>0) links += `<a href=./?img="${nr}">${images[img]}</a> `;
         });
         $("#links").innerHTML = links;
         let params = new URLSearchParams(document.location.search);
         let img = params.get("img");
         console.log(img);
       if (img){
-        let html = `<img src="${images[img]" />`;
+        let html = `<img src="${images[img]}" />`;
         $("#viewer").innerHTM=html;
       }
     })
