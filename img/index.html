@@ -37,12 +37,27 @@
       "img.webp",
       "ION1-21.12.jpg",
     ];
-    //---dom ready--------------------------------
+    
+       
+</script>    
+</head>
+
+<body>
+   <div class="content">
+     <div id="links"></div>
+	   <div class="img" id="viewer"></div>
+   </div>
+   <div class="info"></div>
+   <pre class="log"></pre>
+   
+</body>
+<script>
+	//---dom ready--------------------------------
     document.addEventListener("DOMContentLoaded",function(){
         let links="";
         images.forEach((im,i)=>{
 			let nr=i+1;
-          	if (i>0) links += `<a href=./?img="${nr}">${images[nr]}</a> `;
+          	if (i>0) links += `<a href=./?img="${nr}">${im}</a> `;
         });
         $("#links").innerHTML = links;
         let params = new URLSearchParams(document.location.search);
@@ -54,17 +69,5 @@
       }
     })
     //---DOM READY----------------------------------
-       
-</script>    
-</head>
-
-<body>
-   <div class="content">
-     <div class="links"></div>
-	   <div class="img" id="viewer"></div>
-   </div>
-   <div class="info"></div>
-   <pre class="log"></pre>
-   
-</body>
+</script>
 </html>
